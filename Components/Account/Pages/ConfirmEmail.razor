@@ -4,14 +4,18 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using VSHCTwebApp.Data
+@using VSHCTwebApp.Components.Layout
+@layout EmptyLayout
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityRedirectManager RedirectManager
 
 
-
-<h1>Confirm email</h1>
-<StatusMessage Message="@statusMessage" />
+<div class="app-container">
+    <h1>Подтверждение почты</h1>
+    <StatusMessage Message="@statusMessage" />
+    <NavLink class="register-confirm-button" href="">Домой</NavLink>
+</div>
 
 @code {
     private string? statusMessage;
@@ -42,7 +46,7 @@
         {
             var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
             var result = await UserManager.ConfirmEmailAsync(user, code);
-            statusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+            statusMessage = result.Succeeded ? "Спасибо за подтверждение почты" : "Ошибка в подтверждении почты";
         }
     }
 }

@@ -4,6 +4,8 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using VSHCTwebApp.Data
+@using VSHCTwebApp.Components.Layout
+@layout EmptyLayout
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IEmailSender<ApplicationUser> EmailSender
@@ -11,23 +13,22 @@
 @inject IdentityRedirectManager RedirectManager
 
 
+<div class="app-container">
+    <h1>Подтверждение почты</h1>
 
-<h1>Register confirmation</h1>
+    <StatusMessage Message="@statusMessage" />
 
-<StatusMessage Message="@statusMessage" />
-
-@if (emailConfirmationLink is not null)
-{
-    <p>
-        This app does not currently have a real email sender registered, see <a href="https://aka.ms/aspaccountconf">these docs</a> for how to configure a real email sender.
-        Normally this would be emailed: <a href="@emailConfirmationLink">Click here to confirm your account</a>
-    </p>
-}
-else
-{
-    <p>Please check your email to confirm your account.</p>
-}
-
+    @if (emailConfirmationLink is not null)
+    {
+        <p>
+            <NavLink class="register-confirm-button" href="@emailConfirmationLink">Нажмите, чтобы подтвердить почту</NavLink>
+        </p>
+    }
+    else
+    {
+        <p>Пожалуйста проверьте почту для подтверждения</p>
+    }
+</div>
 @code {
     private string? emailConfirmationLink;
     private string? statusMessage;

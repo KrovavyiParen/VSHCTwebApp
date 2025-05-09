@@ -73,6 +73,18 @@ h1:focus {
 .nav-link {
     background-color: #1B4780 !important; /* Устанавливаем цвет фона */
     color: #ffffff; /* Устанавливаем цвет текста */
+    white-space: nowrap; /* Запрещает перенос текста на новую строку */
+    overflow: hidden; /* Скрывает текст, который выходит за пределы элемента */
+    text-overflow: ellipsis; /* Добавляет "..." в конце обрезанного текста */
+    display: block; /* Необходим для работы text-overflow: ellipsis; */
+    width: 100%;
+}
+
+.nav-item {
+    white-space: nowrap; /* Запрещает перенос текста на новую строку */
+    overflow: hidden; /* Скрывает текст, который выходит за пределы элемента */
+    text-overflow: ellipsis; /* Добавляет "..." в конце обрезанного текста */
+    display: block; /* Необходим для работы text-overflow: ellipsis; */
 }
 
 .page {
@@ -312,6 +324,7 @@ select[multiple] {
     cursor: pointer;
     font-size: 2em;
     transition: background-color 0.3s ease;
+    text-align: center;
 }
 
     .login-button:hover {
@@ -333,6 +346,7 @@ select[multiple] {
     font-size: 2em;
     transition: background-color 0.3s ease;
     margin-top: 50px;
+    text-align: center;
 }
 
     .register-button:hover {
@@ -386,4 +400,19 @@ body-login {
 .details-row {
     width: 100%;
     margin-bottom: 20px; /* Отступ перед кнопками */
+}
+
+.register-confirm-button {
+
+    display: inline-block;
+    background-color: #5A85A6;
+    color: white;
+    padding: 15px 30px;
+    text-decoration: none;
+    border: none;
+    border-radius: 2rem;
+    cursor: pointer;
+    font-size: 2em;
+    transition: background-color 0.3s ease;
+    text-align: center;
 }
