@@ -1,0 +1,96 @@
+﻿@page "/projects/details"
+@using Microsoft.EntityFrameworkCore
+@using VSHCTwebApp.Components.Models
+@using Microsoft.AspNetCore.Identity;
+@using VSHCTwebApp.Data;
+@inject IHttpContextAccessor HttpContextAccessor
+@inject UserManager<ApplicationUser> UserManager
+@inject IDbContextFactory<VSHCTwebApp.Data.VSHCTwebAppContext> DbFactory
+@inject NavigationManager NavigationManager
+
+
+
+<h1>Подробнее</h1>
+
+<div class="details-container">
+
+    <hr />
+    @if (project is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <div class="card shadow-sm p-4 mb-4">
+            <!-- Общая карточка с тенью и отступами -->
+            <dl class="row">
+
+                <!-- Каждый блок в отдельной строке с отступом -->
+
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Название</dt>
+                    <dd class="ms-2 mt-1 fs-5">@project.Title</dd>
+                </div>
+
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Проблема</dt>
+                    <dd class="ms-2 mt-1 fs-5">@project.Problem</dd>
+                </div>
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Предлагаемое решение</dt>
+                    <dd class="ms-2 mt-1 fs-5">@project.Solution</dd>
+                </div>
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Ожидаемый результат</dt>
+                    <dd class="ms-2 mt-1 fs-5">@project.Result</dd>
+                </div>
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Описание необходимых ресурсов для реализации</dt>
+                    <dd class="ms-2 mt-1 fs-5">@project.DescrNeededResurses</dd>
+                </div>
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Стек технологий</dt>
+                    <dd class="ms-2 mt-1 fs-5">@project.StackTech</dd>
+                </div>
+
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Кем создано</dt>
+                    <dd class="ms-2 mt-1 fs-5">@project.CreatedBy</dd>
+                </div>
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Кем одобрено</dt>
+                    <dd class="ms-2 mt-1 fs-5">@project.ConfermedBy</dd>
+                </div>
+            </dl>
+        </div>
+        <div class="details-button-container">
+            @{
+                var currentUser = HttpContextAccessor.HttpContext.User;
+                var currentUserName = UserManager.GetUserName(currentUser);
+            }
+
+            @if (currentUserName == project.ConfermedBy)
+            {
+                <a href="@($"/notes/edit?id={project.Id}")" class="btn btn-primary mb-3">Изменить</a>
+            } |
+            <a href="@($"/projects")" class="btn btn-primary mb-3">Вернуться</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Project? project;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        project = await context.Project.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (project is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

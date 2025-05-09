@@ -1,0 +1,110 @@
+﻿@page "/notes/delete"
+@inject IDbContextFactory<VSHCTwebAppContext> DbFactory
+@using Microsoft.EntityFrameworkCore
+@using VSHCTwebApp.Components.Models
+@using Microsoft.AspNetCore.Identity
+@using VSHCTwebApp.Data
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IDbContextFactory<VSHCTwebApp.Data.VSHCTwebAppContext> DbFactory
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+
+
+
+<h1>Вы уверены что хотите удалить Идею?</h1>
+
+<div>
+    <hr />
+    @if (note is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <div class="card shadow-sm p-4 mb-4">
+            <!-- Общая карточка с тенью и отступами -->
+            <dl class="row">
+
+                <!-- Каждый блок в отдельной строке с отступом -->
+                
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Название</dt>
+                    <dd class="ms-2 mt-1 fs-5">@note.Title</dd>
+                </div>
+
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Проблема:</dt>
+                    <dd class="ms-2 mt-1 fs-5">@note.Problem</dd>
+                </div>
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Предлагаемое решение:</dt>
+                    <dd class="ms-2 mt-1 fs-5">@note.Solution</dd>
+                </div>
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Ожидаемый результат</dt>
+                    <dd class="ms-2 mt-1 fs-5">@note.Result</dd>
+                </div>
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Описание необходимых ресурсов для реализации</dt>
+                    <dd class="ms-2 mt-1 fs-5">@note.DescrNeededResurses</dd>
+                </div>
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Стек технологий</dt>
+                    <dd class="ms-2 mt-1 fs-5">@note.StackTech</dd>
+                </div>
+
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Кем создано</dt>
+                    <dd class="ms-2 mt-1 fs-5">@note.CreatedBy</dd>
+                </div>
+
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Когда создано</dt>
+                    <dd class="ms-2 mt-1 fs-5">@note.CreatedAt</dd>
+                </div>
+            </dl>
+        </div>
+        <EditForm method="post" Model="note" OnValidSubmit="DeleteNote" FormName="delete" Enhance>
+            <AuthorizeView Policy="AdminOnly">
+                <Authorized Context="authContext">
+                    <button type="submit" class="btn btn-danger" disabled="@(note is null)">Удалить</button>
+                </Authorized>
+                <NotAuthorized Context="authContext">
+                    <div class="alert alert-warning mt-3">
+                        У вас недостаточно прав для удаления.
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
+            <a href="/notes">Вернуться</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Note? note;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        note = await context.Note.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (note is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteNote()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Note.Remove(note!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/notes");
+    }
+}

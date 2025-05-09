@@ -1,0 +1,155 @@
+﻿@page "/notes"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using System.Security.Claims
+@using VSHCTwebApp.Components.Models
+@using VSHCTwebApp.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<VSHCTwebApp.Data.VSHCTwebAppContext> DbFactory
+@inject VSHCTwebApp.Components.Services.LikeService LikeService
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+
+<h1>
+    Список идей:
+    <a href="notes/create" class="btn-idea btn-primary" style="float: right;">Добавить идею</a>
+</h1>
+
+<div class="mb-3">
+    <select @bind="selectedSortOption" class="form-select">
+        <option value="dateDesc">По дате (новые сначала)</option>
+        <option value="dateAsc">По дате (старые сначала)</option>
+        <option value="likesDesc">По лайкам (больше сначала)</option>
+        <option value="likesAsc">По лайкам (меньше сначала)</option>
+    </select>
+</div>
+
+<QuickGrid Class="table" Items="sortedNotes">
+    <TemplateColumn Title="Лайки" Context="note">
+        <button @onclick="@(() => ToggleLike(note))"
+                class="btn btn-link @(IsLikedByUser(note) ? "text-danger" : "text-decoration-none")">
+            @(note.Likes?.Count ?? 0)
+        </button>
+    </TemplateColumn>
+
+    <TemplateColumn Title="Название" Context="note">
+        <a href="@($"notes/details?id={note.Id}")" class="text-decoration-none">@note.Title</a>
+    </TemplateColumn>
+
+    <TemplateColumn Title="Кем предложено" Context="note">
+        <a class="text-decoration-none">@note.CreatedBy</a>
+    </TemplateColumn>
+
+    <TemplateColumn Title="Дата создания" Context="note">
+        <span>@note.CreatedAt.ToString("g")</span>
+        @if (selectedSortOption.Contains("date"))
+        {
+            <i class="bi @(selectedSortOption.Contains("Desc") ? "bi-sort-down" : "bi-sort-up")"></i>
+        }
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private List<Note> allNotes = new();
+    private string selectedSortOption = "dateDesc";
+    private string? currentUserId;
+    private IQueryable<Note>? sortedNotes;
+
+
+    [Parameter]
+    public string SelectedSortOption
+    {
+        get => selectedSortOption;
+        set
+        {
+            selectedSortOption = value;
+            UpdateSorting();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var freshContext = DbFactory.CreateDbContext();
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        currentUserId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        freshContext.Note.Include(n => n.Likes).Load();
+
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        allNotes = await context.Note
+            .Include(n => n.Likes)
+            .AsNoTracking()
+            .ToListAsync();
+
+        UpdateSorting();
+    }
+
+    private void UpdateSorting()
+    {
+        var query = allNotes.AsQueryable();
+
+        sortedNotes = selectedSortOption switch
+        {
+            "dateAsc" => query.OrderBy(n => n.CreatedAt),
+            "dateDesc" => query.OrderByDescending(n => n.CreatedAt),
+            "likesAsc" => query.OrderBy(n => n.Likes.Count),
+            "likesDesc" => query.OrderByDescending(n => n.Likes.Count),
+            _ => query
+        };
+
+        StateHasChanged();
+    }
+
+    private bool IsLikedByUser(Note note)
+    {
+        return note.Likes?.Any(l => l.UserId == currentUserId) == true;
+    }
+
+    private async Task ToggleLike(Note note)
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var existingLike = await context.Likes
+            .FirstOrDefaultAsync(l => l.NoteId == note.Id && l.UserId == currentUserId);
+
+        if (existingLike != null)
+        {
+            context.Likes.Remove(existingLike);
+        }
+        else
+        {
+            context.Likes.Add(new Like { NoteId = note.Id, UserId = currentUserId });
+        }
+
+        await context.SaveChangesAsync();
+        await LoadData();
+    }
+
+    private async Task UpdateLikeStatus(Note note)
+    {
+        // Используем новый контекст для свежих данных
+        await using var freshContext = DbFactory.CreateDbContext();
+        var freshNote = await freshContext.Note
+            .Include(n => n.Likes)
+            .FirstOrDefaultAsync(n => n.Id == note.Id);
+
+        note.Likes = freshNote.Likes;
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await using var freshContext = DbFactory.CreateDbContext();
+        if (freshContext != null) await freshContext.DisposeAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        UpdateSorting();
+    }
+}

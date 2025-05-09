@@ -1,0 +1,34 @@
+﻿@page "/commands"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using VSHCTwebApp.Components.Models
+@using VSHCTwebApp.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<VSHCTwebApp.Data.VSHCTwebAppContext> DbFactory
+
+
+
+<h1>
+    Реестр команд
+    <a href="commands/create" class="btn-idea btn-primary" style="float: right;">Создать новую команду</a>
+</h1>
+
+
+
+<QuickGrid Class="table" Items="context.Commands">
+    <TemplateColumn Title="Название" Context="command">
+        <a href="@($"commands/details?id={command.Id}")" class="text-decoration-none">@command.Name</a>
+    </TemplateColumn>  
+
+</QuickGrid>
+
+@code {
+    private VSHCTwebAppContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
