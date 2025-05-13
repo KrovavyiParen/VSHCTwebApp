@@ -6,6 +6,7 @@
 @inject IDbContextFactory<VSHCTwebAppContext> DbFactory
 @inject NavigationManager NavigationManager
 @inject UserManager<ApplicationUser> UserManager
+@rendermode InteractiveServer
 
 
 
@@ -25,7 +26,7 @@ else
             </div>
 
             <div class="card-body">
-                <EditForm Model="@Command" OnValidSubmit="@UpdateCommand" Context="formContext">
+                <EditForm Model="@Command" OnValidSubmit="@UpdateCommand" Context="formContext" FormName="EditCommands">
                     <DataAnnotationsValidator />
                     <ValidationSummary class="alert alert-danger" />
                     <input type="hidden" name="Command.Id" value="@Command.Id" />
