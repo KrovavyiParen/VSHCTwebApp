@@ -90,7 +90,7 @@
     public async Task RegisterUser(EditContext editContext)
     {
         var email = Input.Email;
-        if (!email.EndsWith("@tyuiu.ru") || !email.EndsWith("@std.tyuiu.ru"))
+        if (!email.EndsWith("@tyuiu.ru") && !email.EndsWith("@std.tyuiu.ru"))
         {
             return;
         }
