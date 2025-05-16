@@ -3,11 +3,12 @@
 @using VSHCTwebApp.Components.Models
 @using Microsoft.AspNetCore.Identity;
 @using VSHCTwebApp.Data;
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
 @inject IHttpContextAccessor HttpContextAccessor
 @inject UserManager<ApplicationUser> UserManager
 @inject IDbContextFactory<VSHCTwebApp.Data.VSHCTwebAppContext> DbFactory
 @inject NavigationManager NavigationManager
-
 
 
 <h1>Подробнее</h1>
@@ -60,7 +61,19 @@
                     <dt class="text-primary fw-bold small">Кем одобрено</dt>
                     <dd class="ms-2 mt-1 fs-5">@project.ConfermedBy</dd>
                 </div>
+
+                <div class="col-12 mb-3">
+                    <dt class="text-primary fw-bold small">Статус проекта</dt>
+                    <dd class="ms-2 mt-1 fs-5">
+                        @GetStatusDisplay(project.Status)
+                        @if (project.Status == ProjectStatus.InProgress && !string.IsNullOrEmpty(project.TakenByTeamName))
+                        {
+                            <span> (Команда: @project.TakenByTeamName)</span>
+                        }
+                    </dd>
+                </div>
             </dl>
+
         </div>
         <div class="details-button-container">
             @{
@@ -74,14 +87,46 @@
             } |
             <a href="@($"/projects")" class="btn btn-primary mb-3">Вернуться</a>
         </div>
+        <AuthorizeView Policy="TeamLidOnly">
+            <Authorized>
+                @if (project.Status == ProjectStatus.Available)
+                {
+                    <button class="btn btn-success mb-3" @onclick="TakeProject">
+                        Взять проект
+                    </button>
+                }
+                else if (project.Status == ProjectStatus.InProgress && project.TakenByTeamId == currentUserTeamId)
+                {
+                    <button class="btn btn-warning mb-3" @onclick="ReleaseProject">
+                        Отказаться от проекта
+                    </button>
+                }
+            </Authorized>
+        </AuthorizeView>
     }
 </div>
 
 @code {
+    @rendermode InteractiveServer
     private Project? project;
+    private string? currentUserTeamId;
+    private string? currentUserTeamName;
+    private string? currentUserName;
 
     [SupplyParameterFromQuery]
     private int Id { get; set; }
+
+    private string GetStatusDisplay(ProjectStatus status)
+    {
+        return status switch
+        {
+            ProjectStatus.Available => "Свободен",
+            ProjectStatus.InProgress => "В работе",
+            ProjectStatus.Completed => "Завершен",
+            _ => "Неизвестно"
+        };
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -91,6 +136,71 @@
         if (project is null)
         {
             NavigationManager.NavigateTo("notfound");
+            return;
+        }
+
+        // Получаем текущего пользователя
+        var currentUser = await UserManager.GetUserAsync(HttpContextAccessor.HttpContext.User);
+        currentUserName = currentUser?.UserName;
+
+        // Находим команду пользователя (если есть)
+        if (currentUser != null)
+        {
+            using var dbContext = DbFactory.CreateDbContext();
+            var teamMember = await dbContext.TeamMembers
+                .Include(tm => tm.Command)
+                .FirstOrDefaultAsync(tm => tm.UserId == currentUser.Id);
+
+            if (teamMember != null)
+            {
+                currentUserTeamId = teamMember.CommandId.ToString();
+                currentUserTeamName = teamMember.Command?.Name;
+            }
         }
     }
+
+    private async Task TakeProject()
+    {
+        if (project == null || string.IsNullOrEmpty(currentUserTeamId) || string.IsNullOrEmpty(currentUserTeamName))
+            return;
+
+        using var context = DbFactory.CreateDbContext();
+        var projectToUpdate = await context.Project.FirstOrDefaultAsync(p => p.Id == project.Id);
+
+        if (projectToUpdate != null)
+        {
+            projectToUpdate.Status = ProjectStatus.InProgress;
+            projectToUpdate.TakenByTeamId = currentUserTeamId;
+            projectToUpdate.TakenByTeamName = currentUserTeamName;
+            await context.SaveChangesAsync();
+
+            project.Status = projectToUpdate.Status;
+            project.TakenByTeamId = projectToUpdate.TakenByTeamId;
+            project.TakenByTeamName = projectToUpdate.TakenByTeamName;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ReleaseProject()
+    {
+        if (project == null)
+            return;
+
+        using var context = DbFactory.CreateDbContext();
+        var projectToUpdate = await context.Project.FirstOrDefaultAsync(p => p.Id == project.Id);
+
+        if (projectToUpdate != null)
+        {
+            projectToUpdate.Status = ProjectStatus.Available;
+            projectToUpdate.TakenByTeamId = null;
+            projectToUpdate.TakenByTeamName = null;
+            await context.SaveChangesAsync();
+
+            project.Status = projectToUpdate.Status;
+            project.TakenByTeamId = projectToUpdate.TakenByTeamId;
+            project.TakenByTeamName = projectToUpdate.TakenByTeamName;
+            StateHasChanged();
+        }
+    }
+
 }
