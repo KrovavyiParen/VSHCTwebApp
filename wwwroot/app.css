@@ -454,3 +454,13 @@ body-login {
     margin-left:10px;
     
 }
+.btn-like {
+    display: inline-block;
+    background-color: #ffffff;
+    margin: 5px;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}

@@ -8,7 +8,7 @@ using VSHCTwebApp.Data;
 
 #nullable disable
 
-namespace VSHCTwebApp.Migrations.ApplicationDb
+namespace VSHCTwebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -208,7 +208,7 @@ namespace VSHCTwebApp.Migrations.ApplicationDb
                         {
                             Id = 5,
                             Category = "Database",
-                            Name = "SQL Server"
+                            Name = "SQL"
                         },
                         new
                         {
@@ -227,6 +227,372 @@ namespace VSHCTwebApp.Migrations.ApplicationDb
                             Id = 8,
                             Category = "DevOps",
                             Name = "Kubernetes"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Category = "ProgrammingLanguage",
+                            Name = "PHP"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Category = "ProgrammingLanguage",
+                            Name = "Blueprint"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Category = "ProgrammingLanguage",
+                            Name = "GOLANG"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Category = "ProgrammingLanguage",
+                            Name = "Rust"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Category = "ProgrammingLanguage",
+                            Name = "Flatter"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Category = "ProgrammingLanguage",
+                            Name = "Dart"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Category = "ProgrammingLanguage",
+                            Name = "R Lang"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Category = "ProgrammingLanguage",
+                            Name = "Java"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Category = "ProgrammingLanguage",
+                            Name = "HTML"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Category = "ProgrammingLanguage",
+                            Name = "CSS"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Category = "ProgrammingLanguage",
+                            Name = "C++"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Category = "ProgrammingLanguage",
+                            Name = "Next"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Category = "ProgrammingLanguage",
+                            Name = "Julia"
+                        },
+                        new
+                        {
+                            Id = 22,
+                            Category = "ProgrammingLanguage",
+                            Name = "TypeScript"
+                        },
+                        new
+                        {
+                            Id = 23,
+                            Category = "ProgrammingLanguage",
+                            Name = "Python"
+                        },
+                        new
+                        {
+                            Id = 24,
+                            Category = "ProgrammingLanguage",
+                            Name = "SWIFT"
+                        },
+                        new
+                        {
+                            Id = 25,
+                            Category = "ProgrammingLanguage",
+                            Name = "KOTLIN"
+                        },
+                        new
+                        {
+                            Id = 26,
+                            Category = "ProgrammingLanguage",
+                            Name = "XAML"
+                        },
+                        new
+                        {
+                            Id = 27,
+                            Category = "ProgrammingLanguage",
+                            Name = "Scss"
+                        },
+                        new
+                        {
+                            Id = 28,
+                            Category = "ProgrammingLanguage",
+                            Name = "Ruby"
+                        },
+                        new
+                        {
+                            Id = 29,
+                            Category = "Framework",
+                            Name = "Unreal Engine GameMode"
+                        },
+                        new
+                        {
+                            Id = 30,
+                            Category = "Framework",
+                            Name = "SpringBoot"
+                        },
+                        new
+                        {
+                            Id = 31,
+                            Category = "Framework",
+                            Name = "Keras"
+                        },
+                        new
+                        {
+                            Id = 32,
+                            Category = "Framework",
+                            Name = "Scikit Learn"
+                        },
+                        new
+                        {
+                            Id = 33,
+                            Category = "Framework",
+                            Name = "Pandas"
+                        },
+                        new
+                        {
+                            Id = 34,
+                            Category = "Framework",
+                            Name = "TensorFlow"
+                        },
+                        new
+                        {
+                            Id = 35,
+                            Category = "Framework",
+                            Name = "PyTorch"
+                        },
+                        new
+                        {
+                            Id = 36,
+                            Category = "Framework",
+                            Name = "Vue"
+                        },
+                        new
+                        {
+                            Id = 37,
+                            Category = "Framework",
+                            Name = "PhalconPHP"
+                        },
+                        new
+                        {
+                            Id = 38,
+                            Category = "Framework",
+                            Name = "FastAPI"
+                        },
+                        new
+                        {
+                            Id = 39,
+                            Category = "Framework",
+                            Name = "Flutter"
+                        },
+                        new
+                        {
+                            Id = 40,
+                            Category = "Framework",
+                            Name = "1C"
+                        },
+                        new
+                        {
+                            Id = 41,
+                            Category = "Framework",
+                            Name = "ReactJS"
+                        },
+                        new
+                        {
+                            Id = 42,
+                            Category = "Framework",
+                            Name = "NestJS"
+                        },
+                        new
+                        {
+                            Id = 43,
+                            Category = "Framework",
+                            Name = "Node.js"
+                        },
+                        new
+                        {
+                            Id = 44,
+                            Category = "Framework",
+                            Name = "Next.js"
+                        },
+                        new
+                        {
+                            Id = 45,
+                            Category = "Framework",
+                            Name = ".NET MAUI"
+                        },
+                        new
+                        {
+                            Id = 46,
+                            Category = "Framework",
+                            Name = ".NET 6.0"
+                        },
+                        new
+                        {
+                            Id = 47,
+                            Category = "Framework",
+                            Name = "Django"
+                        },
+                        new
+                        {
+                            Id = 48,
+                            Category = "Framework",
+                            Name = "Unreal Engine"
+                        },
+                        new
+                        {
+                            Id = 49,
+                            Category = "Framework",
+                            Name = "NumPy"
+                        },
+                        new
+                        {
+                            Id = 50,
+                            Category = "Framework",
+                            Name = "ReactNative"
+                        },
+                        new
+                        {
+                            Id = 51,
+                            Category = "Framework",
+                            Name = "Flask"
+                        },
+                        new
+                        {
+                            Id = 52,
+                            Category = "Framework",
+                            Name = "Tailwind"
+                        },
+                        new
+                        {
+                            Id = 53,
+                            Category = "Framework",
+                            Name = "Bootstrap"
+                        },
+                        new
+                        {
+                            Id = 54,
+                            Category = "Framework",
+                            Name = "Ruby on Rails"
+                        },
+                        new
+                        {
+                            Id = 55,
+                            Category = "Framework",
+                            Name = "Jest"
+                        },
+                        new
+                        {
+                            Id = 56,
+                            Category = "Framework",
+                            Name = "Mocha"
+                        },
+                        new
+                        {
+                            Id = 57,
+                            Category = "Framework",
+                            Name = "Cypress"
+                        },
+                        new
+                        {
+                            Id = 58,
+                            Category = "Framework",
+                            Name = "Selenium"
+                        },
+                        new
+                        {
+                            Id = 59,
+                            Category = "Database",
+                            Name = "SQLite"
+                        },
+                        new
+                        {
+                            Id = 60,
+                            Category = "Database",
+                            Name = "FireBase"
+                        },
+                        new
+                        {
+                            Id = 61,
+                            Category = "Database",
+                            Name = "Redis"
+                        },
+                        new
+                        {
+                            Id = 62,
+                            Category = "Database",
+                            Name = "MySQL"
+                        },
+                        new
+                        {
+                            Id = 63,
+                            Category = "Database",
+                            Name = "TypeORM"
+                        },
+                        new
+                        {
+                            Id = 64,
+                            Category = "Database",
+                            Name = "SQL1"
+                        },
+                        new
+                        {
+                            Id = 65,
+                            Category = "Database",
+                            Name = "MongoDB"
+                        },
+                        new
+                        {
+                            Id = 66,
+                            Category = "DevOps",
+                            Name = "Elasticsearch"
+                        },
+                        new
+                        {
+                            Id = 67,
+                            Category = "DevOps",
+                            Name = "Prometheus"
+                        },
+                        new
+                        {
+                            Id = 68,
+                            Category = "DevOps",
+                            Name = "Grafana"
+                        },
+                        new
+                        {
+                            Id = 69,
+                            Category = "DevOps",
+                            Name = "Git"
                         });
                 });
 
