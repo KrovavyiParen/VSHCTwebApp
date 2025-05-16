@@ -9,11 +9,11 @@ using VSHCTwebApp.Data;
 
 #nullable disable
 
-namespace VSHCTwebApp.Migrations
+namespace VSHCTwebApp.Migrations.VSHCTwebApp
 {
     [DbContext(typeof(VSHCTwebAppContext))]
-    [Migration("20250515182619_langteam")]
-    partial class langteam
+    [Migration("20250516173542_mssql.local_migration_961")]
+    partial class mssqllocal_migration_961
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

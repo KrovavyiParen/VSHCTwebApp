@@ -5,7 +5,7 @@
 namespace VSHCTwebApp.Migrations.VSHCTwebApp
 {
     /// <inheritdoc />
-    public partial class mssqllocal_migration_268 : Migration
+    public partial class mssqllocal_migration_380 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
