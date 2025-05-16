@@ -20,62 +20,62 @@
 
 
 
+<div class="auth-container">
+    <div class="login-row">
+        <h1>Регистрация</h1>
+        <div class="col-md-4">
+            <StatusMessage Message="@Message" />
+            <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
+                <DataAnnotationsValidator />
+                <h2>Адрес электронной почты</h2>
+                <ValidationSummary class="text-danger" role="alert" />
+                <div class="form-floating vshct-form">
+                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                    <label for="email" class="vshct-form label">Введите адрес электронной почты</label>
+                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+                </div>
+                <h2>Фамилия</h2>
+                <div class="form-floating vshct-form">
+                    <InputText @bind-Value="Input.LastName" class="form-control" placeholder="Иванов" />
+                    <label>Фамилия</label>
+                    <ValidationMessage For="() => Input.LastName" class="text-danger" />
+                </div>
 
-<div class="login-row">
-    <h1>Регистрация</h1>
-    <div class="col-md-4">
-        <StatusMessage Message="@Message" />
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
-            <DataAnnotationsValidator />
-            <h2>Адрес электронной почты</h2>
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating vshct-form">
-                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label for="email" class="vshct-form label">Введите адрес электронной почты</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
-            </div>
-            <h2>Фамилия</h2>
-            <div class="form-floating vshct-form">
-                <InputText @bind-Value="Input.LastName" class="form-control" placeholder="Иванов" />
-                <label>Фамилия</label>
-                <ValidationMessage For="() => Input.LastName" class="text-danger" />
-            </div>
+                <h2>Имя</h2>
+                <div class="form-floating vshct-form">
+                    <InputText @bind-Value="Input.FirstName" class="form-control" placeholder="Иван" />
+                    <label>Имя</label>
+                    <ValidationMessage For="() => Input.FirstName" class="text-danger" />
+                </div>
 
-            <h2>Имя</h2>
-            <div class="form-floating vshct-form">
-                <InputText @bind-Value="Input.FirstName" class="form-control" placeholder="Иван" />
-                <label>Имя</label>
-                <ValidationMessage For="() => Input.FirstName" class="text-danger" />
-            </div>
-
-            <h2>Группа</h2>
-            <div class="form-floating vshct-form">
-                <InputText @bind-Value="Input.Group" class="form-control" placeholder="ГРУППА-123" />
-                <label>Группа</label>
-                <ValidationMessage For="() => Input.Group" class="text-danger" />
-            </div>
-            <h2>Пароль</h2>
-            <div class="form-floating vshct-form">
-                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="password" class="vshct-form label">Введите пароль</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
-            </div>
-            <h2>Пароль</h2>
-            <div class="form-floating vshct-form">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="confirm-password" class="vshct-form label">Повторите пароль</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
-            </div>
-            <button type="submit" class="register-button">Продолжить</button>
-            <div class="login-register">
-                <p>
-                    <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Уже зарегистрировались? Войти</a>
-                </p>
-            </div>
-        </EditForm>
+                <h2>Группа</h2>
+                <div class="form-floating vshct-form">
+                    <InputText @bind-Value="Input.Group" class="form-control" placeholder="ГРУППА-123" />
+                    <label>Группа</label>
+                    <ValidationMessage For="() => Input.Group" class="text-danger" />
+                </div>
+                <h2>Пароль</h2>
+                <div class="form-floating vshct-form">
+                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                    <label for="password" class="vshct-form label">Введите пароль</label>
+                    <ValidationMessage For="() => Input.Password" class="text-danger" />
+                </div>
+                <h2>Пароль</h2>
+                <div class="form-floating vshct-form">
+                    <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                    <label for="confirm-password" class="vshct-form label">Повторите пароль</label>
+                    <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
+                </div>
+                <button type="submit" class="register-button">Продолжить</button>
+                <div class="login-register">
+                    <p>
+                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Уже зарегистрировались? Войти</a>
+                    </p>
+                </div>
+            </EditForm>
+        </div>
     </div>
 </div>
-
 @code {
     private IEnumerable<IdentityError>? identityErrors;
 
@@ -90,7 +90,7 @@
     public async Task RegisterUser(EditContext editContext)
     {
         var email = Input.Email;
-        if (!email.EndsWith("@tyuiu.ru") || !email.EndsWith("@std.tyuiu.ru"))
+        if (!email.EndsWith("@tyuiu.ru") && !email.EndsWith("@std.tyuiu.ru"))
         {
             return;
         }
