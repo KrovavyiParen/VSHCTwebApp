@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VSHCTwebApp.Data;
 
 #nullable disable
 
-namespace VSHCTwebApp.Migrations
+namespace VSHCTwebApp.Migrations.VSHCTwebApp
 {
     [DbContext(typeof(VSHCTwebAppContext))]
-    partial class VSHCTwebAppContextModelSnapshot : ModelSnapshot
+    [Migration("20250516173542_mssql.local_migration_961")]
+    partial class mssqllocal_migration_961
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -162,15 +165,6 @@ namespace VSHCTwebApp.Migrations
 
                     b.Property<string>("StackTech")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TakenByTeamId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TakenByTeamName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
