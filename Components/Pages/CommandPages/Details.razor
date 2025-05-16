@@ -2,11 +2,11 @@
 @using Microsoft.EntityFrameworkCore
 @using VSHCTwebApp.Components.Models
 @using VSHCTwebApp.Data
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
 @inject IDbContextFactory<VSHCTwebAppContext> DbFactory
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
-
-
 
 <div class="container mt-4">
     <div class="card">
@@ -27,6 +27,146 @@
 
                     <dt class="col-sm-3">Описание:</dt>
                     <dd class="col-sm-9">@command.Description</dd>
+
+                    <dt class="col-sm-3">Стек технологий:</dt>
+                    <dd class="col-sm-9">
+                        <AuthorizeView Policy="TeamLidOnly">
+                            <Authorized>
+                                @if (editingField == "tech")
+                                {
+                                    <div class="mb-3">
+                                        <select class="form-select" multiple
+                                                @onchange="HandleTechStackChange">
+                                            @foreach (var tech in availableTechnologies)
+                                            {
+                                                <option value="@tech" selected="@(selectedTechStack.Contains(tech))">@tech</option>
+                                            }
+                                        </select>
+                                        <button class="btn btn-sm btn-success mt-2" @onclick="SaveChanges">
+                                            <i class="bi bi-check"></i> Сохранить
+                                        </button>
+                                        <button class="btn btn-sm btn-secondary mt-2 ms-2" @onclick="CancelEdit">
+                                            <i class="bi bi-x"></i> Отмена
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div>
+                                        @if (command?.TechStack?.Any() == true)
+                                        {
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @foreach (var tech in command.TechStack)
+                                                {
+                                                    <span class="badge bg-primary">@tech</span>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Не указано</span>
+                                        }
+                                        <button class="btn btn-sm btn-outline-primary ms-2" @onclick='() => StartEdit("tech")'>
+                                            <i class="bi bi-pencil"></i> Изменить
+                                        </button>
+                                    </div>
+                                }
+                            </Authorized>
+                            <NotAuthorized>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </dd>
+                    <dt class="col-sm-3">Языки программирования:</dt>
+                    <dd class="col-sm-9">
+                        <AuthorizeView Policy="TeamLidOnly">
+                            <Authorized>
+                                @if (editingField == "lang")
+                                {
+                                    <div class="mb-3">
+                                        <select class="form-select" multiple
+                                                @onchange="HandleLanguagesChange">
+                                            @foreach (var lang in availableLanguages)
+                                            {
+                                                <option value="@lang" selected="@(selectedLanguages.Contains(lang))">@lang</option>
+                                            }
+                                        </select>
+                                        <button class="btn btn-sm btn-success mt-2" @onclick="SaveChanges">
+                                            <i class="bi bi-check"></i> Сохранить
+                                        </button>
+                                        <button class="btn btn-sm btn-secondary mt-2 ms-2" @onclick="CancelEdit">
+                                            <i class="bi bi-x"></i> Отмена
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div>
+                                        @if (command?.ProgrammingLanguages?.Any() == true)
+                                        {
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @foreach (var lang in command.ProgrammingLanguages)
+                                                {
+                                                    <span class="badge bg-success">@lang</span>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Не указано</span>
+                                        }
+                                        <button class="btn btn-sm btn-outline-primary ms-2" @onclick='() => StartEdit("lang")'>
+                                            <i class="bi bi-pencil"></i> Изменить
+                                        </button>
+                                    </div>
+                                }
+                            </Authorized>
+                            <NotAuthorized>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </dd>
+
+
+                    <dt class="col-sm-3">Статус команды:</dt>
+                    <dd class="col-sm-9">
+                        <AuthorizeView Policy="TeamLidOnly">
+                            <Authorized>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="statusSwitch"
+                                           @bind="command.IsActive"
+                                           @bind:after="UpdateCommand">
+                                    <label class="form-check-label" for="statusSwitch">
+                                        @(command.IsActive ? "В работе" : "В поиске")
+                                    </label>
+                                </div>
+                            </Authorized>
+                            <NotAuthorized>
+                                <div class="form-control-plaintext">
+                                    @(command.IsActive ? "В работе" : "В поиске")
+                                </div>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </dd>
+
+                    <dt class="col-sm-3">Приватность:</dt>
+                    <dd class="col-sm-9">
+                        <AuthorizeView Policy="TeamLidOnly">
+                            <Authorized>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="privacySwitch"
+                                           @bind="command.IsPublic"
+                                           @bind:after="UpdateCommand">
+                                    <label class="form-check-label" for="privacySwitch">
+                                        @(command.IsPublic ? "Открытая" : "Закрытая")
+                                    </label>
+                                </div>
+                            </Authorized>
+                            <NotAuthorized>
+                                <div class="form-control-plaintext">
+                                    @(command.IsPublic ? "Открытая" : "Закрытая")
+                                </div>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </dd>
 
                     <dt class="col-sm-3">Члены команды:</dt>
                     <dd class="col-sm-9">
@@ -66,6 +206,7 @@
     </div>
 </div>
 
+
 @if (showDeleteDialog)
 {
     <div class="modal" tabindex="-1" style="display:block" role="dialog">
@@ -98,6 +239,22 @@
     private Command? command;
     private bool showDeleteDialog = false;
     private bool isDeleting = false;
+    private bool isLoading = false;
+
+    private string? editingField = null; // "tech", "lang" или null
+    private List<string> selectedTechStack = new();
+    private List<string> selectedLanguages = new();
+
+    private readonly List<string> availableTechnologies = new()
+    {
+        "React", "Angular", "Node.js", "Docker", "AWS"
+    };
+
+    private readonly List<string> availableLanguages = new()
+    {
+        "JavaScript", "Python", "C#", "Java", "Go"
+    };
+
 
     [Parameter]
     [SupplyParameterFromQuery]
@@ -106,8 +263,12 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadCommandData();
+        if (command != null)
+        {
+            selectedTechStack = command.TechStack?.ToList() ?? new List<string>();
+            selectedLanguages = command.ProgrammingLanguages?.ToList() ?? new List<string>();
+        }
     }
-
     private async Task LoadCommandData()
     {
         using var context = DbFactory.CreateDbContext();
@@ -120,6 +281,91 @@
             NavigationManager.NavigateTo("notfound");
         }
     }
+    
+    private void StartEdit(string fieldType)
+    {
+        editingField = fieldType;
+
+        if (fieldType == "tech" && command?.TechStack != null)
+        {
+            selectedTechStack = new List<string>(command.TechStack);
+        }
+        else if (fieldType == "lang" && command?.ProgrammingLanguages != null)
+        {
+            selectedLanguages = new List<string>(command.ProgrammingLanguages);
+        }
+
+        StateHasChanged();
+    }
+    private async Task HandleTechStackChange(ChangeEventArgs e)
+    {
+        var selectElement = (e.Value as IEnumerable<string>)?.ToList();
+        if (selectElement != null)
+        {
+            selectedTechStack = selectElement;
+        }
+    }
+    private async Task HandleLanguagesChange(ChangeEventArgs e)
+    {
+        if (e.Value is string[] selectedValues)
+        {
+            selectedLanguages = selectedValues.ToList();
+        }
+    }
+    private async Task SaveChanges()
+    {
+        if (command == null) return;
+
+        if (editingField == "tech")
+        {
+            command.TechStack = selectedTechStack;
+        }
+        else if (editingField == "lang")
+        {
+            command.ProgrammingLanguages = selectedLanguages;
+        }
+
+        await UpdateCommand();
+        editingField = null;
+    }
+
+
+
+    private void CancelEdit()
+    {
+        editingField = null;
+    }
+
+    
+    private async Task UpdateCommand()
+    {
+        if (command == null || isLoading) return;
+
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            using var context = DbFactory.CreateDbContext();
+            context.Commands.Update(command);
+            await context.SaveChangesAsync();
+
+            // Показываем уведомление об успешном сохранении
+            await JSRuntime.InvokeVoidAsync("alert", "Изменения сохранены");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", $"Ошибка при обновлении: {ex.Message}");
+            // Откатываем изменения в UI, если сохранение не удалось
+            await LoadCommandData();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
 
     private void ShowDeleteConfirmation()
     {
