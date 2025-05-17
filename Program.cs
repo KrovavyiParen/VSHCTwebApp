@@ -80,6 +80,10 @@ namespace VSHCTwebApp
                     policy.RequireAssertion(context =>
                         context.User.IsInRole("Client") || context.User.IsInRole("Admin")));
             });
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("TeamLidOnly", policy => policy.RequireRole("TeamLid"));
+            });
 
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();

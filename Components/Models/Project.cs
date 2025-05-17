@@ -1,5 +1,11 @@
 ﻿namespace VSHCTwebApp.Components.Models
 {
+    public enum ProjectStatus
+    {
+        Available,  // Свободен
+        InProgress, // В работе
+        Completed   // Завершен
+    }
     public class Project
     {
         public int Id { get; set; }
@@ -15,6 +21,9 @@
         public string CreatedBy { get; set; } = string.Empty;
 
         public string ConfermedBy { get; set; } = string.Empty;
+        public ProjectStatus Status { get; set; }
+        public string? TakenByTeamId { get; set; } = string.Empty;
+        public string? TakenByTeamName { get; set; } = string.Empty;
 
     }
 }
