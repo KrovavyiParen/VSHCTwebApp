@@ -1,6 +1,10 @@
 ﻿@page "/projects/create"
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using VSHCTwebApp.Components.Models
+@using VSHCTwebApp.Data
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
 @inject IDbContextFactory<VSHCTwebApp.Data.VSHCTwebAppContext> DbFactory
 @inject NavigationManager NavigationManager
 
@@ -61,6 +65,12 @@
     private async Task AddProject()
     {
         using var context = DbFactory.CreateDbContext();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        Project.ConfermedBy = user.UserName;
+        Project.CreatedBy = user.UserName;
+
         context.Project.Add(Project);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/projects");

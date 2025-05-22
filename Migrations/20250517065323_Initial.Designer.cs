@@ -9,11 +9,11 @@ using VSHCTwebApp.Data;
 
 #nullable disable
 
-namespace VSHCTwebApp.Migrations.VSHCTwebApp
+namespace VSHCTwebApp.Migrations
 {
     [DbContext(typeof(VSHCTwebAppContext))]
-    [Migration("20250516173542_mssql.local_migration_961")]
-    partial class mssqllocal_migration_961
+    [Migration("20250517065323_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -165,6 +165,15 @@ namespace VSHCTwebApp.Migrations.VSHCTwebApp
 
                     b.Property<string>("StackTech")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TakenByTeamId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TakenByTeamName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")

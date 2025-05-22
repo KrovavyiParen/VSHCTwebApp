@@ -94,6 +94,7 @@ namespace VSHCTwebApp
                     throw new InvalidOperationException(
             "Connection string 'VSHCTwebAppContext' not found.")));
 
+            builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
             builder.Services.AddQuickGridEntityFrameworkAdapter();
 
