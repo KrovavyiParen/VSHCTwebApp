@@ -8,135 +8,199 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
-<EditForm Model="@editModel" OnValidSubmit="SaveCompetences" FormName="EditCompetencies">
-    <div class="form-group">
-        <label>Языки программирования</label>
-        <InputSelect @bind-Value="editModel.SelectedLanguages" multiple class="form-control">
-            @foreach (var comp in competences[CompetenceCategory.ProgrammingLanguage])
-            {
-                <option value="@comp.Id">@comp.Name</option>
-            }
-        </InputSelect>
-    </div>
-    <div class="form-group">
-        <label>Фреймворки</label>
-        <InputSelect @bind-Value="editModel.SelectedFrameworks" multiple class="form-control">
-            @foreach (var comp in competences[CompetenceCategory.Framework])
-            {
-                <option value="@comp.Id">@comp.Name</option>
-            }
-        </InputSelect>
-    </div>
-    <div class="form-group">
-        <label>Базы данных</label>
-        <InputSelect @bind-Value="editModel.SelectedDatabases" multiple class="form-control">
-            @foreach (var comp in competences[CompetenceCategory.Database])
-            {
-                <option value="@comp.Id">@comp.Name</option>
-            }
-        </InputSelect>
-    </div>
-    <div class="form-group">
-        <label>DevOps технологии</label>
-        <InputSelect @bind-Value="editModel.SelectedDevOps" multiple class="form-control">
-            @foreach (var comp in competences[CompetenceCategory.DevOps])
-            {
-                <option value="@comp.Id">@comp.Name</option>
-            }
-        </InputSelect>
-    </div>
 
-    <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
-</EditForm>
+
+<h3>Мои компетенции</h3>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <dl class="row">
+            <dt class="col-sm-4">Языки программирования:</dt>
+            <dd class="col-sm-8">
+                @if (editingField == "lang")
+                {
+                    <div class="mb-3">
+                        <select class="form-select" multiple @onchange="HandleLanguagesChange">
+                            @foreach (var lang in availableLanguages)
+                            {
+                                <option value="@lang" selected="@(selectedLanguages.Contains(lang))">@lang</option>
+                            }
+                        </select>
+                        <button class="btn btn-sm btn-success mt-2" @onclick="SaveChanges">
+                            <i class="bi bi-check"></i> Сохранить
+                        </button>
+                        <button class="btn btn-sm btn-secondary mt-2 ms-2" @onclick="CancelEdit">
+                            <i class="bi bi-x"></i> Отмена
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        @if (userCompetencies?.ProgrammingLanguages?.Any() == true)
+                        {
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var lang in userCompetencies.ProgrammingLanguages)
+                                {
+                                    <span class="badge bg-primary">@lang</span>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Не указано</span>
+                        }
+                        <button class="btn btn-sm btn-outline-primary ms-2" @onclick='() => StartEdit("lang")'>
+                            <i class="bi bi-pencil"></i> Изменить
+                        </button>
+                    </div>
+                }
+            </dd>
+
+            <dt class="col-sm-4">Стек технологий:</dt>
+            <dd class="col-sm-8">
+                @if (editingField == "tech")
+                {
+                    <div class="mb-3">
+                        <select class="form-select" multiple @onchange="HandleTechStackChange">
+                            @foreach (var tech in availableTechnologies)
+                            {
+                                <option value="@tech" selected="@(selectedTechStack.Contains(tech))">@tech</option>
+                            }
+                        </select>
+                        <button class="btn btn-sm btn-success mt-2" @onclick="SaveChanges">
+                            <i class="bi bi-check"></i> Сохранить
+                        </button>
+                        <button class="btn btn-sm btn-secondary mt-2 ms-2" @onclick="CancelEdit">
+                            <i class="bi bi-x"></i> Отмена
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        @if (userCompetencies?.TechStack?.Any() == true)
+                        {
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var tech in userCompetencies.TechStack)
+                                {
+                                    <span class="badge bg-primary">@tech</span>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Не указано</span>
+                        }
+                        <button class="btn btn-sm btn-outline-primary ms-2" @onclick='() => StartEdit("tech")'>
+                            <i class="bi bi-pencil"></i> Изменить
+                        </button>
+                    </div>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>
 
 @code {
-    private CompetenceEditModel editModel = new();
-    private Dictionary<CompetenceCategory, List<Competence>> competences = new();
+    @rendermode InteractiveServer
+    private string? editingField = null;
+    private List<string> selectedTechStack = new();
+    private List<string> selectedLanguages = new();
+
+    private readonly List<string> availableTechnologies = new()
+    {
+        "React", "Angular", "Vue.js", "Node.js", "ASP.NET Core",
+        "Docker", "Kubernetes", "AWS", "Azure", "SQL",
+        "MongoDB", "Redis", "RabbitMQ", "Git", "CI/CD"
+    };
+
+    private readonly List<string> availableLanguages = new()
+    {
+        "JavaScript", "TypeScript", "Python", "C#", "Java",
+        "Go", "PHP", "Ruby", "Swift", "Kotlin",
+        "Rust", "C++", "SQL", "HTML/CSS", "Dart"
+    };
+
+    private UserCompetencies? userCompetencies;
+    private string? userId;
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbContextFactory.CreateDbContext();
-
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        competences = Enum.GetValues(typeof(CompetenceCategory))
-        .Cast<CompetenceCategory>()
-        .ToDictionary(
-            k => k,
-            v => new List<Competence>()
-        );
-
-        var dbCompetences = await context.Competence.ToListAsync();
-        foreach (var group in dbCompetences.GroupBy(c => c.Category))
-        {
-            competences[group.Key] = group.ToList();
-        }
-
-        // Загрузка выбранных компетенций пользователя
-        var userCompetences = await context.UserCompetence
-            .Where(uc => uc.UserId == userId)
-            .Select(uc => uc.CompetenceId)
-            .ToListAsync();
-
-        editModel = new CompetenceEditModel
-            {
-                SelectedLanguages = GetSelectedForCategory(CompetenceCategory.ProgrammingLanguage, userCompetences),
-                SelectedFrameworks = GetSelectedForCategory(CompetenceCategory.Framework, userCompetences),
-                SelectedDatabases = GetSelectedForCategory(CompetenceCategory.Database, userCompetences),
-                SelectedDevOps = GetSelectedForCategory(CompetenceCategory.DevOps, userCompetences)
-            };
+        await LoadUserCompetencies();
     }
 
-    private List<string> GetSelectedForCategory(CompetenceCategory category, List<int> userCompetences)
-    {
-        return competences[category]
-            .Where(c => userCompetences.Contains(c.Id))
-            .Select(c => c.Id.ToString())
-            .ToList();
-    }
-
-    private async Task SaveCompetences()
+    private async Task LoadUserCompetencies()
     {
         using var context = DbContextFactory.CreateDbContext();
+        userCompetencies = await context.UserCompetencies
+            .AsNoTracking()
+            .FirstOrDefaultAsync(uc => uc.UserId == userId);
 
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        // Удаляем старые компетенции
-        var currentCompetences = await context.UserCompetence
-            .Where(uc => uc.UserId == userId)
-            .ToListAsync();
-        context.UserCompetence.RemoveRange(currentCompetences);
-
-        // Добавляем новые
-        var selectedIds = editModel.GetAllSelectedIds();
-        foreach (var id in selectedIds)
+        if (userCompetencies == null)
         {
-            context.UserCompetence.Add(new UserCompetence
+            userCompetencies = new UserCompetencies
                 {
                     UserId = userId,
-                    CompetenceId = id
-                });
+                    TechStack = new List<string>(),
+                    ProgrammingLanguages = new List<string>()
+                };
+            context.UserCompetencies.Add(userCompetencies);
+            await context.SaveChangesAsync();
         }
-
-        await context.SaveChangesAsync();
     }
 
-    public class CompetenceEditModel
+    private void StartEdit(string fieldType)
     {
-        public List<string> SelectedLanguages { get; set; } = new();
-        public List<string> SelectedFrameworks { get; set; } = new();
-        public List<string> SelectedDatabases { get; set; } = new();
-        public List<string> SelectedDevOps { get; set; } = new();
+        editingField = fieldType;
+    }
 
-        public List<int> GetAllSelectedIds()
+    private void HandleTechStackChange(ChangeEventArgs e)
+    {
+        var selectedValues = e.Value as IEnumerable<string>;
+        if (selectedValues != null)
         {
-            return SelectedLanguages.Select(int.Parse)
-                .Concat(SelectedFrameworks.Select(int.Parse))
-                .Concat(SelectedDatabases.Select(int.Parse))
-                .Concat(SelectedDevOps.Select(int.Parse))
-                .ToList();
+            selectedTechStack = selectedValues.ToList();
         }
+    }
+
+    private void HandleLanguagesChange(ChangeEventArgs e)
+    {
+        var selectedValues = e.Value as IEnumerable<string>;
+        if (selectedValues != null)
+        {
+            selectedLanguages = selectedValues.ToList();
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        if (userCompetencies == null) return;
+
+        using var context = DbContextFactory.CreateDbContext();
+
+        if (editingField == "tech")
+        {
+            userCompetencies.TechStack = selectedTechStack;
+        }
+        else if (editingField == "lang")
+        {
+            userCompetencies.ProgrammingLanguages = selectedLanguages;
+        }
+
+        context.UserCompetencies.Update(userCompetencies);
+        await context.SaveChangesAsync();
+
+        editingField = null;
+    }
+
+    private void CancelEdit()
+    {
+        editingField = null;
+        selectedTechStack = userCompetencies?.TechStack?.ToList() ?? new List<string>();
+        selectedLanguages = userCompetencies?.ProgrammingLanguages?.ToList() ?? new List<string>();
     }
 }
