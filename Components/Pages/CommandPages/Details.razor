@@ -206,7 +206,7 @@
                 </dl>
 
                 <div class="mt-4 d-flex justify-content-between">
-                    <AuthorizeView Policy="">
+                    <AuthorizeView Policy="TeamLidOnly">
                             <Authorized>
                             @if (command.TeamLeaderEmail == currentUserName)
                             {

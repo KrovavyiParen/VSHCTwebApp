@@ -177,6 +177,15 @@
             project.Status = projectToUpdate.Status;
             project.TakenByTeamId = projectToUpdate.TakenByTeamId;
             project.TakenByTeamName = projectToUpdate.TakenByTeamName;
+
+            var currentUser = await UserManager.GetUserAsync(HttpContextAccessor.HttpContext.User);
+            var teamMember = await context.TeamMembers
+                .Include(tm => tm.Command)
+                .FirstOrDefaultAsync(tm => tm.UserId == currentUser.Id);
+
+            var command = await context.Commands.FirstOrDefaultAsync(c => c.Id == teamMember.Command.Id);
+            command.IsActive = true;
+
             StateHasChanged();
         }
     }
@@ -199,6 +208,15 @@
             project.Status = projectToUpdate.Status;
             project.TakenByTeamId = projectToUpdate.TakenByTeamId;
             project.TakenByTeamName = projectToUpdate.TakenByTeamName;
+
+            var currentUser = await UserManager.GetUserAsync(HttpContextAccessor.HttpContext.User);
+            var teamMember = await context.TeamMembers
+                .Include(tm => tm.Command)
+                .FirstOrDefaultAsync(tm => tm.UserId == currentUser.Id);
+
+            var command = await context.Commands.FirstOrDefaultAsync(c => c.Id == teamMember.Command.Id);
+            command.IsActive = false;
+
             StateHasChanged();
         }
     }

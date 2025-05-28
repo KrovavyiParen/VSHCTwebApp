@@ -15,7 +15,7 @@ namespace VSHCTwebApp.Components.Models
         [StringLength(500, ErrorMessage = "Описание не должно превышать 500 символов")]
         public string Description { get; set; }
 
-        public bool IsActive { get; set; } = true; // true - "В работе", false - "В поиске"
+        public bool IsActive { get; set; } = false; // true - "В работе", false - "В поиске"
         public bool IsPublic { get; set; } = true; // true - "Открытая", false - "Закрытая"
         public List<string> TechStack { get; set; } = new();
         public List<string> ProgrammingLanguages { get; set; } = new();
