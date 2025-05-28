@@ -20,6 +20,10 @@ namespace VSHCTwebApp.Components.Models
         public List<string> TechStack { get; set; } = new();
         public List<string> ProgrammingLanguages { get; set; } = new();
 
+        public string TeamLeaderEmail { get; set; } = string.Empty;
+        public string TeamLeaderFirstName { get; set; } = string.Empty;
+        public string TeamLeaderLastName { get; set; } = string.Empty;
+
         public ICollection<TeamMember> Members { get; set; } = new List<TeamMember>();
     }
 }

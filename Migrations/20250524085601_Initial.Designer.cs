@@ -12,8 +12,8 @@ using VSHCTwebApp.Data;
 namespace VSHCTwebApp.Migrations
 {
     [DbContext(typeof(VSHCTwebAppContext))]
-    [Migration("20250523184228_compet")]
-    partial class compet
+    [Migration("20250524085601_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,6 +50,10 @@ namespace VSHCTwebApp.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("ProgrammingLanguages")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TeamLeader")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -200,7 +204,15 @@ namespace VSHCTwebApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserFirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserLastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

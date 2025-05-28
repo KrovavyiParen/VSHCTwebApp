@@ -3,6 +3,7 @@
 @using Microsoft.EntityFrameworkCore
 @using VSHCTwebApp.Components.Models
 @using VSHCTwebApp.Data
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IDbContextFactory<VSHCTwebAppContext> DbFactory
 @inject NavigationManager NavigationManager
 @inject UserManager<ApplicationUser> UserManager
@@ -133,7 +134,6 @@
     private string searchEmail = string.Empty;
     private List<ApplicationUser> foundUsers = new();
 
-
     private async Task ToggleUserSearch()
     {
         showUserSearch = !showUserSearch;
@@ -186,7 +186,9 @@
             Command.Members.Add(new TeamMember
                 {
                     UserId = user.Id,
-                    UserEmail = user.Email
+                    UserEmail = user.Email,
+                    UserLastName = user.LastName,
+                    UserFirstName = user.FirstName
                 });
         }
     }
@@ -202,12 +204,18 @@
         {
             using var context = DbFactory.CreateDbContext();
 
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = await UserManager.GetUserAsync(authState.User);
+
             // Создаем команду
             var newCommand = new Command
                 {
                     Name = Command.Name,
-                    Description = Command.Description
-                };
+                    Description = Command.Description,
+                    TeamLeaderEmail = user.UserName,
+                    TeamLeaderFirstName = user.FirstName,
+                    TeamLeaderLastName = user.LastName
+            };
 
             context.Commands.Add(newCommand);
             await context.SaveChangesAsync();
@@ -219,7 +227,9 @@
                     {
                         CommandId = newCommand.Id,
                         UserId = member.UserId,
-                        UserEmail = member.UserEmail
+                        UserEmail = member.UserEmail,
+                        UserLastName = member.UserLastName,
+                        UserFirstName = member.UserFirstName
                     });
             }
 

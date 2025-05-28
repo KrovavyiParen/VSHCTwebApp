@@ -1,8 +1,11 @@
 ﻿@page "/commands/details"
 @using Microsoft.EntityFrameworkCore
 @using VSHCTwebApp.Components.Models
+@using Microsoft.AspNetCore.Identity;
 @using VSHCTwebApp.Data
 @using Microsoft.AspNetCore.Authorization
+@inject UserManager<ApplicationUser> UserManager
+@inject IHttpContextAccessor HttpContextAccessor
 @inject IAuthorizationService AuthorizationService
 @inject IDbContextFactory<VSHCTwebAppContext> DbFactory
 @inject NavigationManager NavigationManager
@@ -28,11 +31,20 @@
                     <dt class="col-sm-3">Описание:</dt>
                     <dd class="col-sm-9">@command.Description</dd>
 
+                    <dt class="col-sm-3">ТимЛидер:</dt>
+                    <dd class="col-sm-9">@command.TeamLeaderLastName @command.TeamLeaderFirstName @command.TeamLeaderEmail</dd>
+
                     <dt class="col-sm-3">Стек технологий:</dt>
                     <dd class="col-sm-9">
+
+                        @{
+                            var currentUser = HttpContextAccessor.HttpContext.User;
+                            var currentUserName = UserManager.GetUserName(currentUser);
+                        }
+
                         <AuthorizeView Policy="TeamLidOnly">
                             <Authorized>
-                                @if (editingField == "tech")
+                                @if (editingField == "tech" && command.TeamLeaderEmail == currentUserName)
                                 {
                                     <div class="mb-3">
                                         <select class="form-select" multiple
@@ -80,7 +92,7 @@
                     <dd class="col-sm-9">
                         <AuthorizeView Policy="TeamLidOnly">
                             <Authorized>
-                                @if (editingField == "lang")
+                                @if (editingField == "lang" && command.TeamLeaderEmail == currentUserName)
                                 {
                                     <div class="mb-3">
                                         <select class="form-select" multiple
@@ -128,23 +140,26 @@
 
                     <dt class="col-sm-3">Статус команды:</dt>
                     <dd class="col-sm-9">
-                        <AuthorizeView Policy="TeamLidOnly">
-                            <Authorized>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="statusSwitch"
-                                           @bind="command.IsActive"
-                                           @bind:after="UpdateCommand">
-                                    <label class="form-check-label" for="statusSwitch">
+                        @if (command.TeamLeaderEmail == currentUserName)
+                        {
+                            <AuthorizeView Policy="TeamLidOnly">
+                                <Authorized>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="statusSwitch"
+                                        @bind="command.IsActive"
+                                        @bind:after="UpdateCommand">
+                                        <label class="form-check-label" for="statusSwitch">
+                                            @(command.IsActive ? "В работе" : "В поиске")
+                                        </label>
+                                    </div>
+                                </Authorized>
+                                <NotAuthorized>
+                                    <div class="form-control-plaintext">
                                         @(command.IsActive ? "В работе" : "В поиске")
-                                    </label>
-                                </div>
-                            </Authorized>
-                            <NotAuthorized>
-                                <div class="form-control-plaintext">
-                                    @(command.IsActive ? "В работе" : "В поиске")
-                                </div>
-                            </NotAuthorized>
-                        </AuthorizeView>
+                                    </div>
+                                </NotAuthorized>
+                            </AuthorizeView>
+                        }
                     </dd>
 
                     <dt class="col-sm-3">Приватность:</dt>
@@ -176,6 +191,8 @@
                                 @foreach (var member in command.Members)
                                 {
                                     <li class="list-group-item">
+                                        @member.UserLastName
+                                        @member.UserFirstName
                                         @member.UserEmail
                                     </li>
                                 }
@@ -189,14 +206,22 @@
                 </dl>
 
                 <div class="mt-4 d-flex justify-content-between">
-                    <div>
-                        <a href="@($"/commands/edit?id={command.Id}")" class="btn btn-primary">
-                            <i class="bi bi-pencil"></i> Редактировать
-                        </a>
-                        <button @onclick="ShowDeleteConfirmation" class="btn btn-danger ms-2">
-                            <i class="bi bi-trash"></i> Удалить команду
-                        </button>
-                    </div>
+                    <AuthorizeView Policy="">
+                            <Authorized>
+                            @if (command.TeamLeaderEmail == currentUserName)
+                            {
+                                <div>
+                                    <a href="@($"/commands/edit?id={command.Id}")" class="btn btn-primary">
+                                        <i class="bi bi-pencil"></i> Редактировать
+                                    </a>
+                                    <button @onclick="ShowDeleteConfirmation" class="btn btn-danger ms-2">
+                                        <i class="bi bi-trash"></i> Удалить команду
+                                    </button>
+                                </div>
+                            }
+                    </Authorized>
+                            <NotAuthorized></NotAuthorized>
+                    </AuthorizeView>
                     <a href="/commands" class="btn btn-secondary">
                         <i class="bi bi-arrow-left"></i> Назад к списку
                     </a>
@@ -247,12 +272,12 @@
 
     private readonly List<string> availableTechnologies = new()
     {
-        "React", "Angular", "Node.js", "Docker", "AWS"
+        "React", "Angular", "Node.js", "Docker", "AWS", "Pandas", "Vue", "1c", "ReactJS", "NestJS", "Unreal Engine"
     };
 
     private readonly List<string> availableLanguages = new()
     {
-        "JavaScript", "Python", "C#", "Java", "Go"
+        "JavaScript", "Python", "C#", "Java", "Go", "PHP", "Rust", "Dart", "HTML", "CSS", "TypeScript", "Kotlin"
     };
 
 

@@ -12,8 +12,8 @@ using VSHCTwebApp.Data;
 namespace VSHCTwebApp.Migrations
 {
     [DbContext(typeof(VSHCTwebAppContext))]
-    [Migration("20250517065323_Initial")]
-    partial class Initial
+    [Migration("20250528112542_AddTeamLeaderFields")]
+    partial class AddTeamLeaderFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,6 +50,18 @@ namespace VSHCTwebApp.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("ProgrammingLanguages")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TeamLeaderEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TeamLeaderFirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TeamLeaderLastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -200,7 +212,15 @@ namespace VSHCTwebApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserFirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserLastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

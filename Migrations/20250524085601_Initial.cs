@@ -22,7 +22,8 @@ namespace VSHCTwebApp.Migrations
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsPublic = table.Column<bool>(type: "bit", nullable: false),
                     TechStack = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProgrammingLanguages = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ProgrammingLanguages = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TeamLeader = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -80,6 +81,8 @@ namespace VSHCTwebApp.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserLastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserFirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CommandId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
