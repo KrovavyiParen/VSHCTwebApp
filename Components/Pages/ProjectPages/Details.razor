@@ -172,7 +172,6 @@
             projectToUpdate.Status = ProjectStatus.InProgress;
             projectToUpdate.TakenByTeamId = currentUserTeamId;
             projectToUpdate.TakenByTeamName = currentUserTeamName;
-            await context.SaveChangesAsync();
 
             project.Status = projectToUpdate.Status;
             project.TakenByTeamId = projectToUpdate.TakenByTeamId;
@@ -185,6 +184,8 @@
 
             var command = await context.Commands.FirstOrDefaultAsync(c => c.Id == teamMember.Command.Id);
             command.IsActive = true;
+
+            await context.SaveChangesAsync();
 
             StateHasChanged();
         }
@@ -203,7 +204,6 @@
             projectToUpdate.Status = ProjectStatus.Available;
             projectToUpdate.TakenByTeamId = null;
             projectToUpdate.TakenByTeamName = null;
-            await context.SaveChangesAsync();
 
             project.Status = projectToUpdate.Status;
             project.TakenByTeamId = projectToUpdate.TakenByTeamId;
@@ -216,6 +216,8 @@
 
             var command = await context.Commands.FirstOrDefaultAsync(c => c.Id == teamMember.Command.Id);
             command.IsActive = false;
+
+            await context.SaveChangesAsync();
 
             StateHasChanged();
         }
