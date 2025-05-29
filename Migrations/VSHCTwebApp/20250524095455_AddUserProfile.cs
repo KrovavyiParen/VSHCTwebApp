@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace VSHCTwebApp.Migrations
+namespace VSHCTwebApp.Migrations.VSHCTwebApp
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class AddUserProfile : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

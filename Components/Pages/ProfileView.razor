@@ -1,0 +1,112 @@
+﻿@page "/account/{UserId}"
+@inject UserManager<ApplicationUser> UserManager
+@inject IDbContextFactory<VSHCTwebApp.Data.VSHCTwebAppContext> DbFactory
+@using Microsoft.AspNetCore.Identity;
+@using VSHCTwebApp.Data
+@using VSHCTwebApp.Components.Models
+@using Microsoft.AspNetCore.Components.QuickGrid
+
+<AuthorizeView>
+    <Authorized>
+        @if (user == null)
+        {
+            <p>Пользователь не найден</p>
+        }
+        else
+        {
+            <div class="user-profile">
+                <h3>Профиль пользователя: @user.UserName</h3>
+                <dl>
+                    <dt>Email:</dt>
+                    <dd>@user.Email</dd>
+                    <dt>Номер:</dt>
+                    <dd>@user.PhoneNumber</dd>
+                    <dt>Имя, фамилия:</dt>
+                    <dd>@user.LastName @user.FirstName</dd>
+
+
+                </dl>
+            </div>
+        }
+
+        <h4>Идеи</h4>
+        @if (notes == null)
+        {
+            <p>Загрузка...</p>
+        }
+        else
+        {
+           <QuickGrid Class="table" Items="@notes.AsQueryable()" Pagination="@pagination" TGridItem="Note">
+
+                <TemplateColumn Title="Название" Context="note">
+                    <a href="@($"notes/details?id={note.Id}")" class="text-decoration-none">@note.Title</a>
+                </TemplateColumn>
+
+                <TemplateColumn Title="Дата создания" Context="note">
+                    @note.CreatedAt.ToString("g")
+                </TemplateColumn>
+
+           </QuickGrid>
+        }
+
+<h4>Команды</h4>
+@if (commands == null)
+{
+    <p>Загрузка команд...</p>
+}
+else if (!commands.Any())
+{
+    <p>Пользователь не состоит в команде</p>
+}
+else
+{
+    <QuickGrid Class="table" Items="@commands.AsQueryable()" Pagination="@pagination" TGridItem="Command">
+        <TemplateColumn Title="Название команды" Context="command">
+            <a href="@($"commands/details?id={command.Id}")" class="text-decoration-none">@command.Name</a>
+        </TemplateColumn>
+        <TemplateColumn Title="Роль" Context="command">
+            @GetUserRole(command.Id) 
+        </TemplateColumn>
+    </QuickGrid>
+}
+
+    </Authorized>
+    <NotAuthorized>
+        <p>Для просмотра профиля необходимо авторизоваться</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public string UserId { get; set; }
+
+    private ApplicationUser user;
+
+    private List<Note>? notes;
+    private List<Command>? commands;
+    private PaginationState pagination = new() { ItemsPerPage = 10 };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(UserId))
+        {
+            user = await UserManager.FindByIdAsync(UserId);
+        }
+        using var context = DbFactory.CreateDbContext();
+        notes = await context.Note
+            .Where(i => i.CreatedBy == user.UserName)
+            .OrderByDescending(i => i.CreatedAt)
+            .ToListAsync();
+
+        commands = await context.TeamMembers
+            .Where(tm => tm.UserId == UserId) // Используем UserId для связи
+            .Include(tm => tm.Command) // Важно: подгружаем связанные команды
+            .Select(tm => tm.Command)
+            .Distinct()
+            .ToListAsync();
+    }
+    private string GetUserRole(int commandId)
+    {
+        return "Участник"; // Заглушка
+    }
+}

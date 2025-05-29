@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
 using System.Text.Json;
+using VSHCTwebApp.Models;
 using VSHCTwebApp.Components.Models;
 
 namespace VSHCTwebApp.Data
@@ -10,6 +11,8 @@ namespace VSHCTwebApp.Data
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
         public DbSet<UserCompetencies> UserCompetencies { get; set; }
+
+        public DbSet<UserProfile> UserProfiles { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

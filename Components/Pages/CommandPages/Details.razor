@@ -175,8 +175,12 @@
                             <ul class="list-group">
                                 @foreach (var member in command.Members)
                                 {
-                                    <li class="list-group-item">
-                                        @member.UserEmail
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>@member.UserEmail</span>
+                                        <button @onclick="() => ViewProfile(member.UserId)"
+                                                class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-person"></i> Профиль
+                                        </button>
                                     </li>
                                 }
                             </ul>
@@ -255,6 +259,10 @@
         "JavaScript", "Python", "C#", "Java", "Go"
     };
 
+    private void ViewProfile(string userId)
+    {
+        NavigationManager.NavigateTo($"/account/{userId}");
+    }
 
     [Parameter]
     [SupplyParameterFromQuery]

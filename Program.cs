@@ -9,6 +9,7 @@ using VSHCTwebApp.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using VSHCTwebApp.Services;
 
 namespace VSHCTwebApp
 {
@@ -108,7 +109,9 @@ namespace VSHCTwebApp
             builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
             builder.Services.AddSingleton<CommandService>();
-            
+
+            builder.Services.AddScoped<ProfileService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
