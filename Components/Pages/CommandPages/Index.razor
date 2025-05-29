@@ -19,7 +19,16 @@
     <TemplateColumn Title="Название" Context="command">
         <a href="@($"commands/details?id={command.Id}")" class="text-decoration-none">@command.Name</a>
     </TemplateColumn>  
-
+    <TemplateColumn Title="Статус" Context="command">
+        @if (command.IsActive == true)
+        {
+            <span>В работе</span>
+        }
+        @if (command.IsActive == false)
+        {
+            <span>В поиске</span>
+        }
+    </TemplateColumn>
 </QuickGrid>
 
 @code {
