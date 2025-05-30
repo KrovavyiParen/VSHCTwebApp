@@ -4,7 +4,12 @@
 @using Microsoft.AspNetCore.Identity;
 @using VSHCTwebApp.Data
 @using VSHCTwebApp.Components.Models
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
 @using Microsoft.AspNetCore.Components.QuickGrid
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <AuthorizeView>
     <Authorized>
@@ -14,61 +19,99 @@
         }
         else
         {
-            <div class="user-profile">
-                <h3>Профиль пользователя: @user.UserName</h3>
-                <dl>
-                    <dt>Email:</dt>
-                    <dd>@user.Email</dd>
-                    <dt>Номер:</dt>
-                    <dd>@user.PhoneNumber</dd>
-                    <dt>Имя, фамилия:</dt>
-                    <dd>@user.LastName @user.FirstName</dd>
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2>Профиль пользователя: @user.UserName</h2>
+                </div>
+                <div class="card-body">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Данные пользователя</h2>
+                        </div>
+                        <div class="card-body">
+                            <dl class="dl-spaced">
+                                <dt class="dt-spaced"><h3>Email:</h3></dt>
+                                <dd class="dd-spaced"><h5>@user.Email</h5></dd>
+                                <dt class ="dt-spaced"><h3>Номер:</h3></dt>
+                                <dd class="dd-spaced"><h5>@user.PhoneNumber</h5></dd>
+                                <dt class="dt-spaced"><h3>Имя, фамилия:</h3></dt>
+                                <dd class="dd-spaced"><h5>@user.LastName @user.FirstName</h5></dd>
 
+                            </dl>
+                            <h2>Языки программирования:</h2>
+                            @if (userCompetencies?.ProgrammingLanguages?.Any() == true)
+                            {
+                                <div class="badge-container">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var lang in userCompetencies.ProgrammingLanguages)
+                                        {
+                                            <span class="badge bg-primary">@lang</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            <h2>Стек технологий:</h2>
+                            @if (userCompetencies?.TechStack?.Any() == true)
+                            {
+                                <div class="badge-container">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var tech in userCompetencies.TechStack)
+                                        {
+                                            <span class="badge bg-primary">@tech</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="profile-container">
+                        <h2>Идеи</h2>
+                        @if (notes == null)
+                        {
+                            <p>Загрузка...</p>
+                        }
+                        else
+                        {
+                            <QuickGrid Class="table" Items="@notes.AsQueryable()" Pagination="@pagination" TGridItem="Note">
 
-                </dl>
+                                <TemplateColumn Title="Название" Context="note">
+                                    <a href="@($"notes/details?id={note.Id}")" class="text-decoration-none">@note.Title</a>
+                                </TemplateColumn>
+
+                                <TemplateColumn Title="Дата создания" Context="note">
+                                    @note.CreatedAt.ToString("g")
+                                </TemplateColumn>
+
+                            </QuickGrid>
+                        }
+                    </div>
+                    <div class="profile-container">
+                        <h2>Команды</h2>
+                        @if (commands == null)
+                        {
+                            <p>Загрузка команд...</p>
+                        }
+                        else if (!commands.Any())
+                        {
+                            <p>Пользователь не состоит в команде</p>
+                        }
+                        else
+                        {
+                            <QuickGrid Class="table" Items="@commands.AsQueryable()" Pagination="@pagination" TGridItem="Command">
+                                <TemplateColumn Title="Название команды" Context="command">
+                                    <a href="@($"commands/details?id={command.Id}")" class="text-decoration-none">@command.Name</a>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Роль" Context="command">
+                                    @GetUserRole(command.Id)
+                                </TemplateColumn>
+                            </QuickGrid>
+                        }
+                    </div>
+                </div>
             </div>
         }
+        
 
-        <h4>Идеи</h4>
-        @if (notes == null)
-        {
-            <p>Загрузка...</p>
-        }
-        else
-        {
-           <QuickGrid Class="table" Items="@notes.AsQueryable()" Pagination="@pagination" TGridItem="Note">
-
-                <TemplateColumn Title="Название" Context="note">
-                    <a href="@($"notes/details?id={note.Id}")" class="text-decoration-none">@note.Title</a>
-                </TemplateColumn>
-
-                <TemplateColumn Title="Дата создания" Context="note">
-                    @note.CreatedAt.ToString("g")
-                </TemplateColumn>
-
-           </QuickGrid>
-        }
-
-<h4>Команды</h4>
-@if (commands == null)
-{
-    <p>Загрузка команд...</p>
-}
-else if (!commands.Any())
-{
-    <p>Пользователь не состоит в команде</p>
-}
-else
-{
-    <QuickGrid Class="table" Items="@commands.AsQueryable()" Pagination="@pagination" TGridItem="Command">
-        <TemplateColumn Title="Название команды" Context="command">
-            <a href="@($"commands/details?id={command.Id}")" class="text-decoration-none">@command.Name</a>
-        </TemplateColumn>
-        <TemplateColumn Title="Роль" Context="command">
-            @GetUserRole(command.Id) 
-        </TemplateColumn>
-    </QuickGrid>
-}
 
     </Authorized>
     <NotAuthorized>
@@ -81,10 +124,20 @@ else
     public string UserId { get; set; }
 
     private ApplicationUser user;
+    private UserCompetencies? userCompetencies;
+    private string? userId;
 
     private List<Note>? notes;
     private List<Command>? commands;
     private PaginationState pagination = new() { ItemsPerPage = 10 };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        userId = UserId;
+
+        await LoadUserCompetencies();
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -108,5 +161,25 @@ else
     private string GetUserRole(int commandId)
     {
         return "Участник"; // Заглушка
+    }
+
+    private async Task LoadUserCompetencies()
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        userCompetencies = await context.UserCompetencies
+            .AsNoTracking()
+            .FirstOrDefaultAsync(uc => uc.UserId == userId);
+
+        if (userCompetencies == null)
+        {
+            userCompetencies = new UserCompetencies
+                {
+                    UserId = userId,
+                    TechStack = new List<string>(),
+                    ProgrammingLanguages = new List<string>()
+                };
+            context.UserCompetencies.Add(userCompetencies);
+            await context.SaveChangesAsync();
+        }
     }
 }

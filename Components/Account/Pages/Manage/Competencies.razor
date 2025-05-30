@@ -39,24 +39,29 @@
                     <div>
                         @if (userCompetencies?.ProgrammingLanguages?.Any() == true)
                         {
-                            <div class="d-flex flex-wrap gap-2">
-                                @foreach (var lang in userCompetencies.ProgrammingLanguages)
-                                {
-                                    <span class="badge bg-primary">@lang</span>
-                                }
+                            <div class="badge-container">
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var lang in userCompetencies.ProgrammingLanguages)
+                                    {
+                                        <span class="badge bg-primary">@lang</span>
+                                    }
+                                </div>
                             </div>
                         }
                         else
                         {
                             <span class="text-muted">Не указано</span>
                         }
-                        <button class="btn btn-sm btn-outline-primary ms-2" @onclick='() => StartEdit("lang")'>
-                            <i class="bi bi-pencil"></i> Изменить
-                        </button>
+                        
                     </div>
                 }
             </dd>
-
+            @if (editingField != "lang")
+            {
+                <button class="btn btn-sm btn-outline-primary ms-2" @onclick='() => StartEdit("lang")'>
+                    <i class="bi bi-pencil"></i> Изменить
+                </button>
+            }
             <dt class="col-sm-4">Стек технологий:</dt>
             <dd class="col-sm-8">
                 @if (editingField == "tech")
@@ -81,23 +86,29 @@
                     <div>
                         @if (userCompetencies?.TechStack?.Any() == true)
                         {
-                            <div class="d-flex flex-wrap gap-2">
-                                @foreach (var tech in userCompetencies.TechStack)
-                                {
-                                    <span class="badge bg-primary">@tech</span>
-                                }
+                            <div class="badge-container">
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var tech in userCompetencies.TechStack)
+                                    {
+                                        <span class="badge bg-primary">@tech</span>
+                                    }
+                                </div>
                             </div>
                         }
                         else
                         {
                             <span class="text-muted">Не указано</span>
                         }
-                        <button class="btn btn-sm btn-outline-primary ms-2" @onclick='() => StartEdit("tech")'>
-                            <i class="bi bi-pencil"></i> Изменить
-                        </button>
+                        
                     </div>
                 }
             </dd>
+            @if (editingField != "tech")
+                {
+                <button class="btn btn-sm btn-outline-primary ms-2" @onclick='() => StartEdit("tech")'>
+                    <i class="bi bi-pencil"></i> Изменить
+                </button>
+                }
         </dl>
     </div>
 </div>
