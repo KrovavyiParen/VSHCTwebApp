@@ -9,7 +9,7 @@
 
 
 <h1>Биржа проектов
-    <AuthorizeView Policy="ClientOrAdmin">
+    <AuthorizeView Policy="AdminOrTeacher">
         <Authorized Context="authContext">
             <a href="projects/create" class="btn-idea btn-primary" style="float: right;">Добавить проект</a>
         </Authorized>

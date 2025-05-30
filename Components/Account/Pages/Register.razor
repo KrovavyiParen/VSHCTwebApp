@@ -14,6 +14,7 @@
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
+@inject RoleManager<IdentityRole> RoleManager
 @inject IdentityRedirectManager RedirectManager
 @layout EmptyLayout
 
@@ -109,6 +110,21 @@
         }
 
         Logger.LogInformation("User created a new account with password.");
+
+        if (Input.Email.EndsWith("@tyuiu.ru", StringComparison.OrdinalIgnoreCase))
+        {
+            // Находим роль Teacher по имени
+            var teacherRole = await RoleManager.FindByNameAsync("Teacher");
+
+            if (teacherRole != null)
+            {
+                await UserManager.AddToRoleAsync(user, "Teacher");
+            }
+            else
+            {
+                Logger.LogWarning("Роль Teacher не найдена в системе");
+            }
+        }
 
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);

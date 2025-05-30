@@ -85,6 +85,13 @@ namespace VSHCTwebApp
             {
                 options.AddPolicy("TeamLidOnly", policy => policy.RequireRole("TeamLid"));
             });
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOrTeacher", policy =>
+                    policy.RequireAssertion(context =>
+                        context.User.IsInRole("Admin") || context.User.IsInRole("Teacher")));
+            });
+
 
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
