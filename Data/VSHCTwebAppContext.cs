@@ -17,6 +17,7 @@ namespace VSHCTwebApp.Data
         public DbSet<VSHCTwebApp.Components.Models.Note> Note { get; set; } = default!;
         public DbSet<VSHCTwebApp.Components.Models.Project> Project { get; set; } = default!;
         public DbSet<Command> Commands { get; set; }
+        public DbSet<Vacancy> Vacancies { get; set; }
         public DbSet<TeamMember> TeamMembers { get; set; }
     }
 }

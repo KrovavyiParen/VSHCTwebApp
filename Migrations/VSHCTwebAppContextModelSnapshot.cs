@@ -228,6 +228,46 @@ namespace VSHCTwebApp.Migrations
                     b.ToTable("TeamMembers");
                 });
 
+            modelBuilder.Entity("VSHCTwebApp.Components.Models.Vacancy", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CommandId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TeamLeaderEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TeamLeaderFirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TeamLeaderLastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommandId");
+
+                    b.ToTable("Vacancies");
+                });
+
             modelBuilder.Entity("VSHCTwebApp.Components.Models.Like", b =>
                 {
                     b.HasOne("VSHCTwebApp.Components.Models.Note", "Note")
@@ -243,6 +283,17 @@ namespace VSHCTwebApp.Migrations
                 {
                     b.HasOne("VSHCTwebApp.Components.Models.Command", "Command")
                         .WithMany("Members")
+                        .HasForeignKey("CommandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Command");
+                });
+
+            modelBuilder.Entity("VSHCTwebApp.Components.Models.Vacancy", b =>
+                {
+                    b.HasOne("VSHCTwebApp.Components.Models.Command", "Command")
+                        .WithMany()
                         .HasForeignKey("CommandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

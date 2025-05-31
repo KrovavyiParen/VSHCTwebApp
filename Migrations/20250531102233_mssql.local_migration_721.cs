@@ -6,15 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace VSHCTwebApp.Migrations
 {
     /// <inheritdoc />
-<<<<<<< Updated upstream
-    public partial class Initial : Migration
-=======
 <<<<<<<< HEAD:Migrations/20250531102233_mssql.local_migration_721.cs
     public partial class mssqllocal_migration_721 : Migration
 ========
     public partial class Initial : Migration
 >>>>>>>> 11cdccb6981ef3307ab315d17ecc41628da3be42:Migrations/20250531082106_Initial.cs
->>>>>>> Stashed changes
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
