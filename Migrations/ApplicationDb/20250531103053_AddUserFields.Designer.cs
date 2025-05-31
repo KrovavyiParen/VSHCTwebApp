@@ -12,7 +12,7 @@ using VSHCTwebApp.Data;
 namespace VSHCTwebApp.Migrations.ApplicationDb
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250531102354_AddUserFields")]
+    [Migration("20250531103053_AddUserFields")]
     partial class AddUserFields
     {
         /// <inheritdoc />

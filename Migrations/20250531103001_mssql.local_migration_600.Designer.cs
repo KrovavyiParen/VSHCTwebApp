@@ -12,18 +12,8 @@ using VSHCTwebApp.Data;
 namespace VSHCTwebApp.Migrations
 {
     [DbContext(typeof(VSHCTwebAppContext))]
-<<<<<<< Updated upstream
-    [Migration("20250531082106_Initial")]
-    partial class Initial
-=======
-<<<<<<<< HEAD:Migrations/20250531102233_mssql.local_migration_721.Designer.cs
-    [Migration("20250531102233_mssql.local_migration_721")]
-    partial class mssqllocal_migration_721
-========
-    [Migration("20250531082106_Initial")]
-    partial class Initial
->>>>>>>> 11cdccb6981ef3307ab315d17ecc41628da3be42:Migrations/20250531082106_Initial.Designer.cs
->>>>>>> Stashed changes
+    [Migration("20250531103001_mssql.local_migration_600")]
+    partial class mssqllocal_migration_600
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
