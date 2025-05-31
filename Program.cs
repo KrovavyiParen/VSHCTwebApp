@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using VSHCTwebApp.Services;
+using VSHCTwebApp.Components.Models;
 
 namespace VSHCTwebApp
 {
@@ -50,7 +51,12 @@ namespace VSHCTwebApp
             {
                 options.LogoutPath = "/";  // Кастомный путь
                 options.LoginPath = "/Account/Login";    // Чтобы не было /Identity/Account/Login
+                options.ExpireTimeSpan = TimeSpan.FromDays(3);
+                options.SlidingExpiration = true;
             });
+
+            builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+                options.TokenLifespan = TimeSpan.FromHours(3));
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -67,6 +73,7 @@ namespace VSHCTwebApp
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();
+
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
@@ -131,7 +138,7 @@ namespace VSHCTwebApp
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
-    app.UseMigrationsEndPoint();
+                app.UseMigrationsEndPoint();
             }
 
             app.UseHttpsRedirection();

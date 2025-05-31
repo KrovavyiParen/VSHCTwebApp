@@ -12,8 +12,8 @@ using VSHCTwebApp.Data;
 namespace VSHCTwebApp.Migrations
 {
     [DbContext(typeof(VSHCTwebAppContext))]
-    [Migration("20250530135755_mssql.local_migration_527")]
-    partial class mssqllocal_migration_527
+    [Migration("20250531082106_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
