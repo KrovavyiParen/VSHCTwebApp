@@ -27,7 +27,7 @@ else
     <Authorized>
         <!-- Новые проекты -->
         <h2>Новые проекты</h2>
-        <QuickGrid Class="table" Items="@NewProjects.AsQueryable()">
+        <QuickGrid Class="table" Items="@NewProjects.AsQueryable()" Pagination="@pagination">
             <TemplateColumn Title="Название" Context="project">
                 <a href="@($"projects/details?id={project.Id}")" class="text-decoration-none">@project.Title</a>
             </TemplateColumn>
@@ -56,7 +56,7 @@ else
     <Authorized>
         <!-- Подтвержденные проекты -->
         <h2>Подтвержденные проекты</h2>
-        <QuickGrid Class="table" Items="@ConfirmedProjects.AsQueryable()">
+        <QuickGrid Class="table" Items="@ConfirmedProjects.AsQueryable()" Pagination="@pagination">
             <TemplateColumn Title="Название" Context="project">
                 <a href="@($"projects/details?id={project.Id}")" class="text-decoration-none">@project.Title</a>
             </TemplateColumn>
@@ -69,7 +69,7 @@ else
     <Authorized>
         <!-- Доступные студентам -->
         <h2>Доступные для выполнения</h2>
-        <QuickGrid Class="table" Items="@StudentProjects.AsQueryable()">
+        <QuickGrid Class="table" Items="@StudentProjects.AsQueryable()" Pagination="@pagination">
             <TemplateColumn Title="Название" Context="project">
                 <a href="@($"projects/details?id={project.Id}")" class="text-decoration-none">@project.Title</a>
             </TemplateColumn>
@@ -91,6 +91,7 @@ else
     private List<Project> NeedRevisionProjects = new List<Project>();
     private List<Project> ConfirmedProjects = new List<Project>();
     private List<Project> StudentProjects = new List<Project>();
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
     private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
