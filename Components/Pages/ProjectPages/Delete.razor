@@ -50,11 +50,6 @@
                     <dt class="text-primary fw-bold small">Кем создано</dt>
                     <dd class="ms-2 mt-1 fs-5">@project.CreatedBy</dd>
                 </div>
-
-                <div class="col-12 mb-3">
-                    <dt class="text-primary fw-bold small">Кем одобрено</dt>
-                    <dd class="ms-2 mt-1 fs-5">@project.ConfermedBy</dd>
-                </div>
             </dl>
         </div>
         <EditForm method="post" Model="project" OnValidSubmit="DeleteProject" FormName="delete" Enhance>

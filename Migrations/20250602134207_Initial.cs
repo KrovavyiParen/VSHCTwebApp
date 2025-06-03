@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace VSHCTwebApp.Migrations
 {
     /// <inheritdoc />
-    public partial class mssqllocal_migration_600 : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -65,7 +65,6 @@ namespace VSHCTwebApp.Migrations
                     DescrNeededResurses = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StackTech = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ConfermedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     TakenByTeamId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TakenByTeamName = table.Column<string>(type: "nvarchar(max)", nullable: true)

@@ -68,8 +68,8 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = await UserManager.GetUserAsync(authState.User);
 
-        Project.ConfermedBy = user.UserName;
-        Project.CreatedBy = user.UserName;
+        Project.CreatedBy = $"{user.LastName} {user.FirstName}";
+        Project.CreatedByEmail = $"{user.UserName}";
 
         context.Project.Add(Project);
         await context.SaveChangesAsync();

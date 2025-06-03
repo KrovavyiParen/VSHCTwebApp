@@ -12,8 +12,8 @@ using VSHCTwebApp.Data;
 namespace VSHCTwebApp.Migrations
 {
     [DbContext(typeof(VSHCTwebAppContext))]
-    [Migration("20250531103001_mssql.local_migration_600")]
-    partial class mssqllocal_migration_600
+    [Migration("20250603133850_EnchancedClassProject")]
+    partial class EnchancedClassProject
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -151,11 +151,11 @@ namespace VSHCTwebApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ConfermedBy")
+                    b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<string>("CreatedByEmail")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

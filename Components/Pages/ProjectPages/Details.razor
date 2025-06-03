@@ -57,10 +57,6 @@
                     <dt class="text-primary fw-bold small">Кем создано</dt>
                     <dd class="ms-2 mt-1 fs-5">@project.CreatedBy</dd>
                 </div>
-                <div class="col-12 mb-3">
-                    <dt class="text-primary fw-bold small">Кем одобрено</dt>
-                    <dd class="ms-2 mt-1 fs-5">@project.ConfermedBy</dd>
-                </div>
 
                 <div class="col-12 mb-3">
                     <dt class="text-primary fw-bold small">Статус проекта</dt>
@@ -81,7 +77,7 @@
                 var currentUserName = UserManager.GetUserName(currentUser);
             }
 
-            @if (currentUserName == project.ConfermedBy)
+            @if (currentUserName == project.CreatedBy)
             {
                 <a href="@($"/notes/edit?id={project.Id}")" class="btn btn-primary mb-3">Изменить</a>
             } |

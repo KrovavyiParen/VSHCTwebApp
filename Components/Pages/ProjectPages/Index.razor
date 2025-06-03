@@ -3,41 +3,158 @@
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using VSHCTwebApp.Components.Models
 @using VSHCTwebApp.Data
-@implements IAsyncDisposable
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IDbContextFactory<VSHCTwebApp.Data.VSHCTwebAppContext> DbFactory
+@inject AuthenticationStateProvider AuthProvider
 
 
-
-<h1>Биржа проектов
-    <AuthorizeView Policy="AdminOrTeacher">
-        <Authorized Context="authContext">
+<AuthorizeView Policy="">
+    <Authorized>
+        <h1>
+            Биржа проектов
             <a href="projects/create" class="btn-idea btn-primary" style="float: right;">Добавить проект</a>
-        </Authorized>
-        <NotAuthorized Context="authContext">
+        </h1>
+    </Authorized>
+</AuthorizeView>
 
-        </NotAuthorized>
-    </AuthorizeView>
-    
-</h1>
+@if (isLoading)
+{
+    <p>Загрузка данных...</p>
+}
+else
+{
+<AuthorizeView Policy="">
+    <Authorized>
+        <!-- Новые проекты -->
+        <h2>Новые проекты</h2>
+        <QuickGrid Class="table" Items="@NewProjects.AsQueryable()">
+            <TemplateColumn Title="Название" Context="project">
+                <a href="@($"projects/details?id={project.Id}")" class="text-decoration-none">@project.Title</a>
+            </TemplateColumn>
+            <PropertyColumn Property="(p) => p.CreatedBy" Title="Кем создано" />
+        </QuickGrid>
+    </Authorized>
+</AuthorizeView>
 
+<AuthorizeView Policy="">
+    <Authorized>
+        <!-- Проекты, нуждающиеся в доработке -->
+        @if (NeedRevisionProjects?.Any() == true)
+        {
+            <h2>Требуют доработки</h2>
+            <QuickGrid Class="table" Items="@NeedRevisionProjects.AsQueryable()">
+                <TemplateColumn Title="Название" Context="project">
+                    <a href="@($"projects/details?id={project.Id}")" class="text-decoration-none">@project.Title</a>
+                </TemplateColumn>
+                <PropertyColumn Property="(p) => p.CreatedBy" Title="Кем создано" />
+            </QuickGrid>
+        }
+    </Authorized>
+</AuthorizeView>
 
+<AuthorizeView Policy="">
+    <Authorized>
+        <!-- Подтвержденные проекты -->
+        <h2>Подтвержденные проекты</h2>
+        <QuickGrid Class="table" Items="@ConfirmedProjects.AsQueryable()">
+            <TemplateColumn Title="Название" Context="project">
+                <a href="@($"projects/details?id={project.Id}")" class="text-decoration-none">@project.Title</a>
+            </TemplateColumn>
+            <PropertyColumn Property="(p) => p.CreatedBy" Title="Кем создано" />
+        </QuickGrid>
+    </Authorized>
+</AuthorizeView>
 
-<QuickGrid Class="table" Items="context.Project">
-    <TemplateColumn Title="Название" Context="project">
-        <a href="@($"projects/details?id={project.Id}")" class="text-decoration-none">@project.Title</a>
-    </TemplateColumn>
-    <PropertyColumn Property="project => project.CreatedBy" Title = "Кем создано"/>
-    <PropertyColumn Property="project => project.ConfermedBy" Title = "Кем одобрено"/>
-
-</QuickGrid>
+<AuthorizeView Policy="">
+    <Authorized>
+        <!-- Доступные студентам -->
+        <h2>Доступные для выполнения</h2>
+        <QuickGrid Class="table" Items="@StudentProjects.AsQueryable()">
+            <TemplateColumn Title="Название" Context="project">
+                <a href="@($"projects/details?id={project.Id}")" class="text-decoration-none">@project.Title</a>
+            </TemplateColumn>
+            <PropertyColumn Property="(p) => p.CreatedBy" Title="Кем создано" />
+            <TemplateColumn Title="Статус" Context="project">
+                <span>@GetStatusDisplayName(project.Status)</span>
+            </TemplateColumn>
+        </QuickGrid>
+    </Authorized>
+    <NotAuthorized>
+        <h1>Биржа проектов</h1>
+        <p>Для просмотра проектов необходимо авторизоваться</p>
+    </NotAuthorized>
+</AuthorizeView>
+}
 
 @code {
-    private VSHCTwebAppContext context = default!;
+    private List<Project> NewProjects = new List<Project>();
+    private List<Project> NeedRevisionProjects = new List<Project>();
+    private List<Project> ConfirmedProjects = new List<Project>();
+    private List<Project> StudentProjects = new List<Project>();
+    private bool isLoading = true;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        await LoadProjectsAsync();
     }
 
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+    private async Task LoadProjectsAsync()
+    {
+        isLoading = true;
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userName = user.Identity?.Name;
+
+        // Параллельная загрузка данных
+        var loadTasks = new List<Task>
+        {
+            LoadProjectsByStatus(ProjectStatus.New, result => NewProjects = result),
+            LoadProjectsByStatus(ProjectStatus.Approved, result => ConfirmedProjects = result),
+            LoadStudentProjectsAsync(),
+            LoadNeedRevisionProjectsAsync(userName)
+        };
+
+        await Task.WhenAll(loadTasks);
+        isLoading = false;
+        StateHasChanged(); // Обновляем интерфейс
+    }
+
+    private async Task LoadStudentProjectsAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        StudentProjects = await context.Project
+            .Where(p => p.Status == ProjectStatus.Available ||
+                        p.Status == ProjectStatus.InProgress)
+            .ToListAsync();
+    }
+
+    private async Task LoadProjectsByStatus(ProjectStatus status, Action<List<Project>> setResult)
+    {
+        using var context = DbFactory.CreateDbContext();
+        var result = await context.Project
+            .Where(p => p.Status == status)
+            .ToListAsync();
+        setResult(result);
+    }
+
+    private async Task LoadNeedRevisionProjectsAsync(string userName)
+    {
+        if (string.IsNullOrEmpty(userName)) return;
+
+        using var context = DbFactory.CreateDbContext();
+        var projects = await context.Project
+            .Where(p => p.Status == ProjectStatus.NeedRevision && p.CreatedBy == userName)
+            .ToListAsync();
+        NeedRevisionProjects = projects;
+    }
+
+    private string GetStatusDisplayName(ProjectStatus status)
+    {
+        return status switch
+        {
+            ProjectStatus.Available => "Доступен",
+            ProjectStatus.InProgress => "В работе",
+            _ => status.ToString()
+        };
+    }
 }

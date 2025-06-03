@@ -2,6 +2,9 @@
 {
     public enum ProjectStatus
     {
+        New,        // Новый
+        Approved,   // Подтвержден
+        NeedRevision,// Нужно редактирование
         Available,  // Свободен
         InProgress, // В работе
         Completed   // Завершен
@@ -19,8 +22,7 @@
         public string StackTech { get; set; } = string.Empty;
 
         public string CreatedBy { get; set; } = string.Empty;
-
-        public string ConfermedBy { get; set; } = string.Empty;
+        public string CreatedByEmail { get; set; } = string.Empty;
         public ProjectStatus Status { get; set; }
         public string? TakenByTeamId { get; set; } = string.Empty;
         public string? TakenByTeamName { get; set; } = string.Empty;
