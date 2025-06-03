@@ -77,9 +77,9 @@
                 var currentUserName = UserManager.GetUserName(currentUser);
             }
 
-            @if (currentUserName == project.CreatedBy)
+            @if (currentUserName == project.CreatedByEmail)
             {
-                <a href="@($"/notes/edit?id={project.Id}")" class="btn btn-primary mb-3">Изменить</a>
+                <a href="@($"/projects/edit?id={project.Id}")" class="btn btn-primary mb-3">Изменить</a>
             } |
             <a href="@($"/projects")" class="btn btn-primary mb-3">Вернуться</a>
         </div>
@@ -99,6 +99,21 @@
                 }
             </Authorized>
         </AuthorizeView>
+        @if (project != null && project.Status == ProjectStatus.New)
+        {
+            <AuthorizeView Policy="">
+                <Authorized>
+                    <div class="mt-4">
+                        <button class="btn btn-success me-2" @onclick="ApproveProject">
+                            Подтвердить (@project.ApprovalCount из 3)
+                        </button>
+                        <button class="btn btn-warning" @onclick="SendForRevision">
+                            Отправить на доработку
+                        </button>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+        }
     }
 </div>
 
@@ -108,6 +123,7 @@
     private string? currentUserTeamId;
     private string? currentUserTeamName;
     private string? currentUserName;
+    private bool HasVoted { get; set; }
 
     [SupplyParameterFromQuery]
     private int Id { get; set; }
@@ -116,6 +132,9 @@
     {
         return status switch
         {
+            ProjectStatus.New => "Новый",
+            ProjectStatus.Approved => "Подтвержден",
+            ProjectStatus.NeedRevision => "Требует доработки",
             ProjectStatus.Available => "Свободен",
             ProjectStatus.InProgress => "В работе",
             ProjectStatus.Completed => "Завершен",
@@ -152,6 +171,11 @@
                 currentUserTeamId = teamMember.CommandId.ToString();
                 currentUserTeamName = teamMember.Command?.Name;
             }
+        }
+
+        if (currentUser != null && !string.IsNullOrEmpty(currentUser.Id))
+        {
+            HasVoted = project.ApprovedByExperts?.Contains(currentUser.Id) ?? false;
         }
     }
 
@@ -219,4 +243,60 @@
         }
     }
 
+    private async Task ApproveProject()
+    {
+        if (project == null || HasVoted) return;
+
+        using var context = DbFactory.CreateDbContext();
+        var projectToUpdate = await context.Project.FindAsync(project.Id);
+
+        if (projectToUpdate == null) return;
+
+        var currentUser = await UserManager.GetUserAsync(HttpContextAccessor.HttpContext.User);
+
+        // Добавляем ID эксперта в список
+        projectToUpdate.ApprovedByExperts += $"{currentUser.Id};";
+        projectToUpdate.ApprovalCount++;
+
+        // Проверяем достижение лимита подтверждений
+        if (projectToUpdate.ApprovalCount >= 3)
+        {
+            projectToUpdate.Status = ProjectStatus.Approved;
+        }
+
+        await context.SaveChangesAsync();
+
+        // Обновляем локальное состояние
+        project.ApprovalCount = projectToUpdate.ApprovalCount;
+        project.Status = projectToUpdate.Status;
+        project.ApprovedByExperts = projectToUpdate.ApprovedByExperts;
+        HasVoted = true;
+
+        StateHasChanged();
+    }
+
+    private async Task SendForRevision()
+    {
+        if (project == null) return;
+
+        using var context = DbFactory.CreateDbContext();
+        var projectToUpdate = await context.Project.FindAsync(project.Id);
+
+        if (projectToUpdate == null) return;
+
+        // Сбрасываем подтверждения и меняем статус
+        projectToUpdate.Status = ProjectStatus.NeedRevision;
+        projectToUpdate.ApprovalCount = 0;
+        projectToUpdate.ApprovedByExperts = "";
+
+        await context.SaveChangesAsync();
+
+        // Обновляем локальное состояние
+        project.Status = projectToUpdate.Status;
+        project.ApprovalCount = 0;
+        project.ApprovedByExperts = "";
+        HasVoted = false;
+
+        StateHasChanged();
+    }
 }

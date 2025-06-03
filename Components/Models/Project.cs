@@ -27,5 +27,7 @@
         public string? TakenByTeamId { get; set; } = string.Empty;
         public string? TakenByTeamName { get; set; } = string.Empty;
 
+        public int ApprovalCount { get; set; } // Счетчик подтверждений
+        public string ApprovedByExperts { get; set; } = ""; // Список экспертов
     }
 }

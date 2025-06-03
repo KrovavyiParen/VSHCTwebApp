@@ -65,9 +65,12 @@ namespace VSHCTwebApp.Migrations
                     DescrNeededResurses = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StackTech = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedByEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     TakenByTeamId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TakenByTeamName = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    TakenByTeamName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ApprovalCount = table.Column<int>(type: "int", nullable: false),
+                    ApprovedByExperts = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

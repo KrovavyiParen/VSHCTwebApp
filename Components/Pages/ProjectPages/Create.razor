@@ -70,6 +70,7 @@
 
         Project.CreatedBy = $"{user.LastName} {user.FirstName}";
         Project.CreatedByEmail = $"{user.UserName}";
+        Project.ApprovedByExperts = "";
 
         context.Project.Add(Project);
         await context.SaveChangesAsync();

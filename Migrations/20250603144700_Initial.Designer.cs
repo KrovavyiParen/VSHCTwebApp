@@ -12,7 +12,7 @@ using VSHCTwebApp.Data;
 namespace VSHCTwebApp.Migrations
 {
     [DbContext(typeof(VSHCTwebAppContext))]
-    [Migration("20250602134207_Initial")]
+    [Migration("20250603144700_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -151,7 +151,18 @@ namespace VSHCTwebApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ApprovalCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ApprovedByExperts")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedByEmail")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

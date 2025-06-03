@@ -1,9 +1,11 @@
 ﻿@page "/projects/edit"
 @using Microsoft.EntityFrameworkCore
 @using VSHCTwebApp.Components.Models
+@using VSHCTwebApp.Data;
 @inject IDbContextFactory<VSHCTwebApp.Data.VSHCTwebAppContext> DbFactory
 @inject NavigationManager NavigationManager
-
+@inject IHttpContextAccessor HttpContextAccessor
+@inject UserManager<ApplicationUser> UserManager
 
 
 <h1>Изменить</h1>
@@ -68,6 +70,9 @@ else
     [SupplyParameterFromForm]
     private Project? Project { get; set; }
 
+    private string currentUserEmail;
+    private string currentUserName;
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
@@ -85,6 +90,15 @@ else
     {
         using var context = DbFactory.CreateDbContext();
         context.Attach(Project!).State = EntityState.Modified;
+        var currentUser = await UserManager.GetUserAsync(HttpContextAccessor.HttpContext.User);
+        currentUserEmail = currentUser?.UserName;
+        currentUserName = $"{currentUser.LastName} {currentUser.FirstName}";
+
+        Project.CreatedBy = currentUserName;
+        Project.CreatedByEmail = currentUserEmail;
+        Project.ApprovedByExperts = "";
+        Project.Status = ProjectStatus.New;
+        Project.ApprovalCount = 0;
 
         try
         {

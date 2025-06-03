@@ -144,7 +144,7 @@ else
 
         using var context = DbFactory.CreateDbContext();
         var projects = await context.Project
-            .Where(p => p.Status == ProjectStatus.NeedRevision && p.CreatedBy == userName)
+            .Where(p => p.Status == ProjectStatus.NeedRevision && p.CreatedByEmail == userName)
             .ToListAsync();
         NeedRevisionProjects = projects;
     }
