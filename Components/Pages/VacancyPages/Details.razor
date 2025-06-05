@@ -11,7 +11,6 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
 @inject IJSRuntime JSRuntime
-@rendermode InteractiveServer
 
 <div class="container mt-4">
     <div class="card">
@@ -132,6 +131,7 @@
     </div>
 }
 
+
 @if (showResponseModal)
 {
     <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)" tabindex="-1">
@@ -219,7 +219,6 @@
         }
     }
 
-
     private void ShowDeleteConfirmation()
     {
         showDeleteDialog = true;
@@ -273,13 +272,12 @@
 
     private async Task SubmitResponse()
     {
+        // Проверка сообщения
         if (string.IsNullOrWhiteSpace(responseMessage))
         {
-            await JSRuntime.InvokeVoidAsync("alert", "Введите сообщение");
+            await JSRuntime.InvokeVoidAsync("alert", "Введите текст отклика");
             return;
         }
-
-        if (vacancy == null) return;
 
         isSubmitting = true;
 
@@ -289,8 +287,14 @@
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var currentUser = await UserManager.GetUserAsync(authState.User);
 
-            if (currentUser == null) return;
+            // Проверка наличия пользователя и вакансии
+            if (currentUser == null || vacancy == null)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Ошибка: данные не найдены");
+                return;
+            }
 
+            // Создание нового отклика
             var response = new Response
                 {
                     VacancyId = vacancy.Id,
@@ -299,9 +303,21 @@
                     ResponseDate = DateTime.UtcNow
                 };
 
+            // Явная загрузка связанных данных
+            response.Vacancy = await context.Vacancies.FindAsync(vacancy.Id);
+            response.User = currentUser;
+
+            // Проверка связей
+            if (response.Vacancy == null || response.User == null)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Ошибка: не найдены связанные данные");
+                return;
+            }
+
             context.Responses.Add(response);
             await context.SaveChangesAsync();
 
+            // Обновление UI
             responses.Insert(0, response);
             hasResponded = true;
             showResponseModal = false;
