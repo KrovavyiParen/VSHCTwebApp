@@ -20,6 +20,8 @@ public class Vacancy
     public string TeamLeaderFirstName { get; set; } = string.Empty;
     public string TeamLeaderLastName { get; set; } = string.Empty;
 
-    public int CommandId { get; set; }
-    public Command Command { get; set; }
+    public int? CommandId { get; set; }
+
+    [ForeignKey("CommandId")]
+    public Command? Command { get; set; }
 }

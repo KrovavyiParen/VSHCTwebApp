@@ -1,199 +1,96 @@
 ﻿@page "/vacancy/details"
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using VSHCTwebApp.Components.Models
-@using Microsoft.AspNetCore.Identity;
 @using VSHCTwebApp.Data
-@using Microsoft.AspNetCore.Authorization
-@inject UserManager<ApplicationUser> UserManager
-@inject IHttpContextAccessor HttpContextAccessor
-@inject IAuthorizationService AuthorizationService
+@using System.ComponentModel.DataAnnotations
 @inject IDbContextFactory<VSHCTwebAppContext> DbFactory
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
 @inject IJSRuntime JSRuntime
 
 <div class="container mt-4">
     <div class="card">
         <div class="card-header bg-primary text-white">
-            <h2>Детали вакансии</h2>
+            <h2>@vacancy?.Name</h2>
         </div>
 
         <div class="card-body">
-            @if (command is null)
+            @if (vacancy == null)
             {
                 <p class="text-center"><em>Загрузка данных...</em></p>
             }
             else
             {
-                <dl class="row">
-                    <dt class="col-sm-3">Название команды:</dt>
-                    <dd class="col-sm-9">@command.Name</dd>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Описание:</dt>
+                            <dd class="col-sm-8">@vacancy.Description</dd>
 
-                    <dt class="col-sm-3">Описание:</dt>
-                    <dd class="col-sm-9">@command.Description</dd>
+                            <dt class="col-sm-4">Контактное лицо:</dt>
+                            <dd class="col-sm-8">
+                                @vacancy.TeamLeaderLastName @vacancy.TeamLeaderFirstName
+                                <br />
+                                <small class="text-muted">@vacancy.TeamLeaderEmail</small>
+                            </dd>
 
-                    <dt class="col-sm-3">ТимЛидер:</dt>
-                    <dd class="col-sm-9">@command.TeamLeaderLastName @command.TeamLeaderFirstName @command.TeamLeaderEmail</dd>
-
-                    <dt class="col-sm-3">Стек технологий:</dt>
-                    <dd class="col-sm-9">
-
-                        @{
-                            var currentUser = HttpContextAccessor.HttpContext.User;
-                            var currentUserName = UserManager.GetUserName(currentUser);
-                        }
-
-                        <AuthorizeView Policy="TeamLidOnly">
-                            <Authorized>
-                                @if (editingField == "tech" && command.TeamLeaderEmail == currentUserName)
-                                {
-
-                                }
-                                else
-                                {
-                                    <div>
-                                        @if (command?.TechStack?.Any() == true)
-                                        {
-                                            <div class="d-flex flex-wrap gap-2">
-                                                @foreach (var tech in command.TechStack)
-                                                {
-                                                    <span class="badge bg-primary">@tech</span>
-                                                }
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">Не указано</span>
-                                        }
-                                    </div>
-                                }
-                            </Authorized>
-                            <NotAuthorized>
-                            </NotAuthorized>
-                        </AuthorizeView>
-                    </dd>
-                    <dt class="col-sm-3">Языки программирования:</dt>
-                    <dd class="col-sm-9">
-                        <AuthorizeView Policy="TeamLidOnly">
-                            <Authorized>
-                                @if (editingField == "lang" && command.TeamLeaderEmail == currentUserName)
-                                {
-
-                                }
-                                else
-                                {
-                                    <div>
-                                        @if (command?.ProgrammingLanguages?.Any() == true)
-                                        {
-                                            <div class="d-flex flex-wrap gap-2">
-                                                @foreach (var lang in command.ProgrammingLanguages)
-                                                {
-                                                    <span class="badge bg-success">@lang</span>
-                                                }
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">Не указано</span>
-                                        }
-                                    </div>
-                                }
-                            </Authorized>
-                            <NotAuthorized>
-                            </NotAuthorized>
-                        </AuthorizeView>
-                    </dd>
-
-
-                    <dt class="col-sm-3">Статус команды:</dt>
-                    <dd class="col-sm-9">
-                        @if (command.TeamLeaderEmail == currentUserName)
-                        {
-                            <AuthorizeView Policy="TeamLidOnly">
-                                <Authorized>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="statusSwitch"
-                                        @bind="command.IsActive"
-                                        @bind:after="UpdateCommand">
-                                        <label class="form-check-label" for="statusSwitch">
-                                            @(command.IsActive ? "В работе" : "В поиске")
-                                        </label>
-                                    </div>
-                                </Authorized>
-                                <NotAuthorized>
-                                    <div class="form-control-plaintext">
-                                        @(command.IsActive ? "В работе" : "В поиске")
-                                    </div>
-                                </NotAuthorized>
-                            </AuthorizeView>
-                        }
-                    </dd>
-
-                    <dt class="col-sm-3">Приватность:</dt>
-                    <dd class="col-sm-9">
-                        <AuthorizeView Policy="TeamLidOnly">
-                            <Authorized>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="privacySwitch"
-                                           @bind="command.IsPublic"
-                                           @bind:after="UpdateCommand">
-                                    <label class="form-check-label" for="privacySwitch">
-                                        @(command.IsPublic ? "Открытая" : "Закрытая")
-                                    </label>
-                                </div>
-                            </Authorized>
-                            <NotAuthorized>
-                                <div class="form-control-plaintext">
-                                    @(command.IsPublic ? "Открытая" : "Закрытая")
-                                </div>
-                            </NotAuthorized>
-                        </AuthorizeView>
-                    </dd>
-
-                    <dt class="col-sm-3">Члены команды:</dt>
-                    <dd class="col-sm-9">
-                        @if (command.Members?.Any() == true)
-                        {
-                            <ul class="list-group">
-                                @foreach (var member in command.Members)
-                                {
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span>@member.UserEmail</span>
-                                        <button @onclick="() => ViewProfile(member.UserId)"
-                                                class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-person"></i> Профиль
-                                        </button>
-                                    </li>
-                                }
-                            </ul>
-                        }
-                        else
-                        {
-                            <span class="text-muted">Участники не добавлены</span>
-                        }
-                    </dd>
-                </dl>
-
-                <div class="mt-4 d-flex justify-content-between">
-                    <AuthorizeView Policy="TeamLidOnly">
-                            <Authorized>
-                            @if (command.TeamLeaderEmail == currentUserName)
-                            {
-                                <div>
-                                    <a href="@($"/vacancy/edit?id={command.Id}")" class="btn btn-primary">
-                                        <i class="bi bi-pencil"></i> Редактировать
-                                    </a>
-                                    <button @onclick="ShowDeleteConfirmation" class="btn btn-danger ms-2">
-                                        <i class="bi bi-trash"></i> Удалить команду
-                                    </button>
-                                </div>
-                            }
-                    </Authorized>
-                            <NotAuthorized></NotAuthorized>
-                    </AuthorizeView>
-                    <a href="/commands" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Назад к списку
-                    </a>
+                            <dt class="col-sm-4">Команда:</dt>
+                            <dd class="col-sm-8">@(vacancy.Command?.Name ?? "Не указана")</dd>
+                        </dl>
+                    </div>
                 </div>
+
+                <!-- Кнопки действий -->
+                <div class="d-flex justify-content-between">
+                    <div>
+                        @if (isCurrentUserOwner)
+                        {
+                            <a href="@($"/vacancy/edit?id={vacancy.Id}")" class="btn btn-primary me-2">
+                                <i class="bi bi-pencil"></i> Редактировать
+                            </a>
+                            <button class="btn btn-danger me-2" @onclick="() => showDeleteDialog = true">
+                                <i class="bi bi-trash"></i> Удалить
+                            </button>
+                        }
+                        else if (!hasResponded)
+                        {
+                            <button class="btn btn-success me-2" @onclick="ShowResponseModal">
+                                <i class="bi bi-envelope-plus"></i> Откликнуться
+                            </button>
+                        }
+                        <a href="/vacancy" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Назад к списку
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Список откликов (виден только автору) -->
+                @if (isCurrentUserOwner && responses.Any())
+                {
+                    <div class="mt-4">
+                        <h5>Отклики (@responses.Count)</h5>
+                        @foreach (var response in responses)
+                        {
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>@response.User?.UserName</h6>
+                                            <p class="mb-1">@response.Message</p>
+                                            <small class="text-muted">@response.ResponseDate.ToString("g")</small>
+                                        </div>
+                                        <a href="mailto:@response.User?.Email" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-envelope"></i> Написать
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
             }
         </div>
     </div>
@@ -202,7 +99,7 @@
 
 @if (showDeleteDialog)
 {
-    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+    <div class="modal" tabindex="-1" style="display:block; background:rgba(0,0,0,0.5)">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
@@ -210,37 +107,73 @@
                     <button type="button" class="btn-close" @onclick="CancelDelete"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Вы уверены, что хотите удалить команду "@command?.Name"?</p>
+                    <p>Вы уверены, что хотите удалить вакансию "@vacancy?.Name"?</p>
                     <p class="text-danger">Это действие нельзя отменить!</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CancelDelete">
-                        <i class="bi bi-x-circle"></i> Отмена
+                        Отмена
                     </button>
                     <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">
-                        <i class="bi bi-trash"></i> Удалить
+                        @if (isDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                        }
+                        else
+                        {
+                            <span>Удалить</span>
+                        }
                     </button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="modal-backdrop fade show"></div>
+}
+
+@if (showResponseModal)
+{
+    <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5)" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Отклик на вакансию</h5>
+                    <button type="button" class="btn-close" @onclick="CloseResponseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Ваше сообщение:</label>
+                        <InputTextArea @bind-Value="responseMessage" class="form-control" rows="5" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseResponseModal">
+                        Отмена
+                    </button>
+                    <button type="button" class="btn btn-primary" @onclick="SubmitResponse" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                        }
+                        Отправить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 @code {
-    @rendermode InteractiveServer
-    private Command? command;
     private Vacancy? vacancy;
+    private bool isCurrentUserOwner = false;
     private bool showDeleteDialog = false;
     private bool isDeleting = false;
-    private bool isLoading = false;
 
-    private string? editingField = null; // "tech", "lang" или null
-
-    private void ViewProfile(string userId)
-    {
-        NavigationManager.NavigateTo($"/account/{userId}");
-    }
+    // Новые поля для функционала откликов
+    private List<Response> responses = new();
+    private bool hasResponded = false;
+    private bool showResponseModal = false;
+    private string responseMessage = string.Empty;
+    private bool isSubmitting = false;
 
     [Parameter]
     [SupplyParameterFromQuery]
@@ -248,56 +181,39 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadCommandData();
-    }
-    private async Task LoadCommandData()
-    {
-        using var context = DbFactory.CreateDbContext();
-        command = await context.Commands
-            .Include(c => c.Members)
-            .FirstOrDefaultAsync(m => m.Id == Id);
-
-        if (command is null)
-        {
-            NavigationManager.NavigateTo("notfound");
-        }
-    }
-    
-    
-    
-    
-
-
-
-    
-
-    
-    private async Task UpdateCommand()
-    {
-        if (command == null || isLoading) return;
-
-        isLoading = true;
-        StateHasChanged();
-
         try
         {
             using var context = DbFactory.CreateDbContext();
-            context.Commands.Update(command);
-            await context.SaveChangesAsync();
 
-            // Показываем уведомление об успешном сохранении
-            await JSRuntime.InvokeVoidAsync("alert", "Изменения сохранены");
+            vacancy = await context.Vacancies
+                .Include(v => v.Command)
+                .FirstOrDefaultAsync(v => v.Id == Id);
+
+            if (vacancy == null)
+            {
+                NavigationManager.NavigateTo("/notfound");
+                return;
+            }
+
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var currentUser = await UserManager.GetUserAsync(authState.User);
+
+            if (currentUser != null)
+            {
+                isCurrentUserOwner = currentUser.Email == vacancy.TeamLeaderEmail;
+
+                responses = await context.Responses
+                    .Include(r => r.User)
+                    .Where(r => r.VacancyId == Id)
+                    .OrderByDescending(r => r.ResponseDate)
+                    .ToListAsync();
+
+                hasResponded = responses.Any(r => r.UserId == currentUser.Id);
+            }
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("console.error", $"Ошибка при обновлении: {ex.Message}");
-            // Откатываем изменения в UI, если сохранение не удалось
-            await LoadCommandData();
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
+            Console.WriteLine($"Ошибка загрузки: {ex.Message}");
         }
     }
 
@@ -305,51 +221,98 @@
     private void ShowDeleteConfirmation()
     {
         showDeleteDialog = true;
-        StateHasChanged();
     }
 
     private void CancelDelete()
     {
         showDeleteDialog = false;
-        StateHasChanged();
     }
 
     private async Task ConfirmDelete()
     {
-        if (isDeleting) return;
+        if (vacancy == null || isDeleting) return;
 
         isDeleting = true;
-        StateHasChanged();
 
         try
         {
             using var context = DbFactory.CreateDbContext();
+            var vacancyToDelete = await context.Vacancies.FindAsync(vacancy.Id);
 
-            // Удаляем всех участников команды
-            var members = await context.TeamMembers
-                .Where(tm => tm.CommandId == Id)
-                .ToListAsync();
-
-            context.TeamMembers.RemoveRange(members);
-
-            // Удаляем саму команду
-            var commandToDelete = await context.Commands.FindAsync(Id);
-            if (commandToDelete != null)
+            if (vacancyToDelete != null)
             {
-                context.Commands.Remove(commandToDelete);
+                context.Vacancies.Remove(vacancyToDelete);
+                await context.SaveChangesAsync();
+                await JSRuntime.InvokeVoidAsync("alert", "Вакансия успешно удалена!");
+                NavigationManager.NavigateTo("/vacancy");
             }
-
-            await context.SaveChangesAsync();
-
-            // Перенаправляем на список команд
-            NavigationManager.NavigateTo("/commands", forceLoad: true);
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("console.error", $"Ошибка при удалении: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Ошибка при удалении: {ex.Message}");
+        }
+        finally
+        {
             isDeleting = false;
             showDeleteDialog = false;
-            StateHasChanged();
+        }
+    }
+
+    private void ShowResponseModal()
+    {
+        responseMessage = string.Empty;
+        showResponseModal = true;
+    }
+
+    private void CloseResponseModal()
+    {
+        showResponseModal = false;
+    }
+
+    private async Task SubmitResponse()
+    {
+        if (string.IsNullOrWhiteSpace(responseMessage))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Введите сообщение");
+            return;
+        }
+
+        if (vacancy == null) return;
+
+        isSubmitting = true;
+
+        try
+        {
+            using var context = DbFactory.CreateDbContext();
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var currentUser = await UserManager.GetUserAsync(authState.User);
+
+            if (currentUser == null) return;
+
+            var response = new Response
+                {
+                    VacancyId = vacancy.Id,
+                    UserId = currentUser.Id,
+                    Message = responseMessage,
+                    ResponseDate = DateTime.UtcNow
+                };
+
+            context.Responses.Add(response);
+            await context.SaveChangesAsync();
+
+            responses.Insert(0, response);
+            hasResponded = true;
+            showResponseModal = false;
+
+            await JSRuntime.InvokeVoidAsync("alert", "Ваш отклик успешно отправлен!");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Ошибка: {ex.Message}");
+        }
+        finally
+        {
+            isSubmitting = false;
         }
     }
 }

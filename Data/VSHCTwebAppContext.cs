@@ -19,5 +19,6 @@ namespace VSHCTwebApp.Data
         public DbSet<Command> Commands { get; set; }
         public DbSet<Vacancy> Vacancies { get; set; }
         public DbSet<TeamMember> TeamMembers { get; set; }
+        public DbSet<Response> Responses { get; set; }
     }
 }
