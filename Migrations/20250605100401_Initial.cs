@@ -12,6 +12,34 @@ namespace VSHCTwebApp.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "ApplicationUser",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Group = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApplicationUser", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Commands",
                 columns: table => new
                 {
@@ -111,7 +139,7 @@ namespace VSHCTwebApp.Migrations
                     TeamLeaderEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TeamLeaderFirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TeamLeaderLastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CommandId = table.Column<int>(type: "int", nullable: false)
+                    CommandId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -120,8 +148,7 @@ namespace VSHCTwebApp.Migrations
                         name: "FK_Vacancies_Commands_CommandId",
                         column: x => x.CommandId,
                         principalTable: "Commands",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -145,10 +172,47 @@ namespace VSHCTwebApp.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Responses",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    VacancyId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ResponseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Responses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Responses_ApplicationUser_UserId",
+                        column: x => x.UserId,
+                        principalTable: "ApplicationUser",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Responses_Vacancies_VacancyId",
+                        column: x => x.VacancyId,
+                        principalTable: "Vacancies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Likes_NoteId",
                 table: "Likes",
                 column: "NoteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Responses_UserId",
+                table: "Responses",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Responses_VacancyId",
+                table: "Responses",
+                column: "VacancyId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TeamMembers_CommandId",
@@ -171,13 +235,19 @@ namespace VSHCTwebApp.Migrations
                 name: "Project");
 
             migrationBuilder.DropTable(
+                name: "Responses");
+
+            migrationBuilder.DropTable(
                 name: "TeamMembers");
 
             migrationBuilder.DropTable(
-                name: "Vacancies");
+                name: "Note");
 
             migrationBuilder.DropTable(
-                name: "Note");
+                name: "ApplicationUser");
+
+            migrationBuilder.DropTable(
+                name: "Vacancies");
 
             migrationBuilder.DropTable(
                 name: "Commands");
