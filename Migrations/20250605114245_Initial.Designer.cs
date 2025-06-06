@@ -12,7 +12,7 @@ using VSHCTwebApp.Data;
 namespace VSHCTwebApp.Migrations
 {
     [DbContext(typeof(VSHCTwebAppContext))]
-    [Migration("20250605100401_Initial")]
+    [Migration("20250605114245_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -110,7 +110,15 @@ namespace VSHCTwebApp.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<string>("CreatedByEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedByName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

@@ -94,7 +94,9 @@ else
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = await UserManager.GetUserAsync(authState.User);
-            Note.CreatedBy = user.UserName;
+            Note.CreatedByEmail = user.UserName;
+            Note.CreatedByName = $"{user.LastName} {user.FirstName}";
+            Note.CreatedById = user.Id;
             Note.CreatedAt = DateTime.Now;
             await context.SaveChangesAsync();
         }

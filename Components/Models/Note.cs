@@ -19,7 +19,9 @@ namespace VSHCTwebApp.Components.Models
         public string DescrNeededResurses { get; set; } = string.Empty;
         public string StackTech { get; set; } = string.Empty;
 
-        public string CreatedBy { get; set; }
+        public string CreatedByName { get; set; }
+        public string CreatedByEmail { get; set; }
+        public string CreatedById { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<Like> Likes { get; set; } = new();
     }

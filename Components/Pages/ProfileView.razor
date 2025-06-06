@@ -147,7 +147,7 @@
         }
         using var context = DbFactory.CreateDbContext();
         notes = await context.Note
-            .Where(i => i.CreatedBy == user.UserName)
+            .Where(i => i.CreatedByEmail == user.UserName)
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync();
 

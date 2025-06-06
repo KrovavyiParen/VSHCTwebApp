@@ -39,7 +39,7 @@
     </TemplateColumn>
 
     <TemplateColumn Title="Кем предложено" Context="note">
-        <a class="text-decoration-none">@note.CreatedBy</a>
+        <a href="@($"/account/{note.CreatedById}")" class="text-decoration-none">@note.CreatedByName</a>
     </TemplateColumn>
 
     <TemplateColumn Title="Дата создания" Context="note">

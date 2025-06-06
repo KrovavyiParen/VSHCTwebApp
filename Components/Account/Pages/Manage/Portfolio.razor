@@ -65,7 +65,7 @@ else
 
         using var context = DbFactory.CreateDbContext();
         notes = await context.Note
-            .Where(i => i.CreatedBy == userName)
+            .Where(i => i.CreatedByEmail == userName)
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync();
 

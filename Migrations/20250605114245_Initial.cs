@@ -72,7 +72,9 @@ namespace VSHCTwebApp.Migrations
                     Result = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DescrNeededResurses = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StackTech = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedByName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedByEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedById = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
