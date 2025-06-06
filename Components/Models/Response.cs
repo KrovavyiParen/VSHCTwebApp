@@ -6,21 +6,24 @@ namespace VSHCTwebApp.Components.Models;
 
 public class Response
 {
-    [Key]
     public int Id { get; set; }
 
+    [Required]
     public int VacancyId { get; set; }
 
     [ForeignKey("VacancyId")]
-    public Vacancy? Vacancy { get; set; }  // Делаем nullable
+    public Vacancy Vacancy { get; set; }  // Не должно быть nullable
 
-    public string? UserId { get; set; }  // Делаем nullable
+    [Required]
+    public string UserId { get; set; }  // Не должно быть nullable
 
     [ForeignKey("UserId")]
-    public ApplicationUser? User { get; set; }  // Делаем nullable
+    public ApplicationUser User { get; set; }  // Не должно быть nullable
 
+    [Required]
     public DateTime ResponseDate { get; set; } = DateTime.UtcNow;
 
     [Required(ErrorMessage = "Сообщение обязательно")]
-    public string? Message { get; set; }  // Делаем nullable
+    [StringLength(500)]
+    public string Message { get; set; }
 }

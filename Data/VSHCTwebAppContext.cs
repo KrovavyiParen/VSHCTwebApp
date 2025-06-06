@@ -20,5 +20,17 @@ namespace VSHCTwebApp.Data
         public DbSet<Vacancy> Vacancies { get; set; }
         public DbSet<TeamMember> TeamMembers { get; set; }
         public DbSet<Response> Responses { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Response>()
+                .HasOne(r => r.Vacancy)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict); // Или Cascade в зависимости от логики
+
+            modelBuilder.Entity<Response>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+        }
     }
 }
