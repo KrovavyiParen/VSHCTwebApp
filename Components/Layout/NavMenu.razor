@@ -26,13 +26,13 @@
 
             <div class="nav-item px-3">
                     <NavLink class="nav-link" href="notes">
-                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Идеи
+                        <span class="bi bi-lightbulb-fill" aria-hidden="true"></span> Идеи
                 </NavLink>
             </div>
 
             <div class="nav-item px-3">
                     <NavLink class="nav-link" href="projects">
-                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Биржа проектов
+                    <span class="bi bi-plus-square-fill" aria-hidden="true"></span> Биржа проектов
                 </NavLink>
             </div>
 
@@ -44,13 +44,13 @@
 
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="vacancy">
-                        <span class="bi bi-terminal-fill" aria-hidden="true"></span> Вакансии
+                        <span class="bi bi-person-badge-fill" aria-hidden="true"></span> Вакансии
                     </NavLink>
                 </div>
             
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                        <span class="bi bi-person-fill" aria-hidden="true"></span> @context.User.Identity?.Name
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
@@ -58,7 +58,7 @@
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                         <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Выйти
+                            <span class="bi bi-arrow-bar-left" aria-hidden="true"></span> Выйти
                         </button>
                     </form>
                 </div>
@@ -66,12 +66,12 @@
             <NotAuthorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Регистрация
+                        <span class="bi bi-person" aria-hidden="true"></span> Регистрация
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Логин
+                        <span class="bi bi-person-badge" aria-hidden="true"></span> Логин
                     </NavLink>
                 </div>
             </NotAuthorized>
