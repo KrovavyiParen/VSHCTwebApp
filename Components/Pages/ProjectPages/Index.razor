@@ -123,10 +123,31 @@ else
     private async Task LoadStudentProjectsAsync()
     {
         using var context = DbFactory.CreateDbContext();
+        var now = DateTime.Now;
+
         StudentProjects = await context.Project
-            .Where(p => p.Status == ProjectStatus.Available ||
-                        p.Status == ProjectStatus.InProgress)
+            .Where(p => (p.Status == ProjectStatus.Available ||
+                        p.Status == ProjectStatus.InProgress) &&
+                        (!p.AvailableUntil.HasValue || p.AvailableUntil > now))
             .ToListAsync();
+
+        // Автоматически возвращаем просроченные проекты
+        var expiredProjects = await context.Project
+            .Where(p => p.IsManuallyMadeAvailable &&
+                       p.AvailableUntil.HasValue &&
+                       p.AvailableUntil <= now)
+            .ToListAsync();
+
+        foreach (var project in expiredProjects)
+        {
+            project.Status = ProjectStatus.Approved;
+            project.IsManuallyMadeAvailable = false;
+        }
+
+        if (expiredProjects.Any())
+        {
+            await context.SaveChangesAsync();
+        }
     }
 
     private async Task LoadProjectsByStatus(ProjectStatus status, Action<List<Project>> setResult)

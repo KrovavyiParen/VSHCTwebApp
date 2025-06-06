@@ -117,6 +117,36 @@
     }
 </div>
 
+@if (project != null && project.Status == ProjectStatus.Approved)
+{
+    <AuthorizeView Policy="AdminOnly">
+        <Authorized>
+            <div class="mt-4">
+                @if (!project.IsManuallyMadeAvailable)
+                {
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="availableUntil" class="form-label">Срок доступности:</label>
+                            <InputDate id="availableUntil" @bind-Value="availableUntilDate" class="form-control" />
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-success" @onclick="MakeProjectAvailable">
+                                Открыть доступ
+                            </button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        Проект доступен до: @project.AvailableUntil?.ToString("dd.MM.yyyy")
+                    </div>
+                }
+            </div>
+        </Authorized>
+    </AuthorizeView>
+}
+
 @code {
     @rendermode InteractiveServer
     private Project? project;
@@ -124,6 +154,7 @@
     private string? currentUserTeamName;
     private string? currentUserName;
     private bool HasVoted { get; set; }
+    private DateTime availableUntilDate = DateTime.Now.AddMonths(1); // Значение по умолчанию
 
     [SupplyParameterFromQuery]
     private int Id { get; set; }
@@ -177,6 +208,29 @@
         {
             HasVoted = project.ApprovedByExperts?.Contains(currentUser.Id) ?? false;
         }
+    }
+
+    private async Task MakeProjectAvailable()
+    {
+        if (project == null) return;
+
+        using var context = DbFactory.CreateDbContext();
+        var projectToUpdate = await context.Project.FindAsync(project.Id);
+
+        if (projectToUpdate == null) return;
+
+        projectToUpdate.Status = ProjectStatus.Available;
+        projectToUpdate.AvailableUntil = availableUntilDate;
+        projectToUpdate.IsManuallyMadeAvailable = true;
+
+        await context.SaveChangesAsync();
+
+        project.Status = projectToUpdate.Status;
+        project.AvailableUntil = projectToUpdate.AvailableUntil;
+        project.IsManuallyMadeAvailable = projectToUpdate.IsManuallyMadeAvailable;
+
+        StateHasChanged();
+        NavigationManager.NavigateTo("/projects", forceLoad: true);
     }
 
     private async Task TakeProject()
