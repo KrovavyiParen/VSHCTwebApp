@@ -20,8 +20,11 @@ namespace VSHCTwebApp.Data
         public DbSet<Vacancy> Vacancies { get; set; }
         public DbSet<TeamMember> TeamMembers { get; set; }
         public DbSet<Response> Responses { get; set; }
+        public DbSet<ProjectApplication> ProjectApplications { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Response>()
                 .HasOne(r => r.Vacancy)
                 .WithMany()
@@ -31,6 +34,22 @@ namespace VSHCTwebApp.Data
                 .HasOne(r => r.User)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ProjectApplication>(entity =>
+            {
+                entity.HasKey(a => a.Id); // Явное указание первичного ключа
+
+                entity.Property(a => a.TeamId)
+                    .IsRequired()
+                    .HasMaxLength(450); // Длина для GUID
+
+                entity.Property(a => a.TeamName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(a => a.Message)
+                    .HasMaxLength(500);
+            });
         }
     }
 }

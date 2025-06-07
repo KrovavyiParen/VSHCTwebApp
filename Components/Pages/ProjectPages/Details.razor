@@ -83,22 +83,79 @@
             } |
             <a href="@($"/projects")" class="btn btn-primary mb-3">Вернуться</a>
         </div>
-        <AuthorizeView Policy="TeamLidOnly">
-            <Authorized>
-                @if (project.Status == ProjectStatus.Available)
+        @if (project != null && project.Status == ProjectStatus.Available)
+        {
+            <div class="mt-4">
+                <h3>Заявки на проект</h3>
+
+                <!-- Форма подачи заявки (для капитана) -->
+                <AuthorizeView Policy="TeamLidOnly">
+                    <Authorized>
+                        @if (existingApplication == null)
+                        {
+                            <div class="application-form mb-4">
+                                <h4>Подать заявку</h4>
+                                <textarea class="form-control mb-2" placeholder="Ваше сообщение..."
+                                          @bind="newApplicationMessage"></textarea>
+                                <button class="btn btn-primary" @onclick="SubmitApplication">Отправить заявку</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                Ваша заявка:
+                                <strong>@GetApplicationStatusDisplay(existingApplication.Status)</strong>
+                                <br />
+                                <small>@existingApplication.Message</small>
+                            </div>
+                        }
+                    </Authorized>
+                </AuthorizeView>
+
+                <!-- Список заявок (для заказчика) -->
+                @if (currentUserName == project.CreatedByEmail && applications.Any())
                 {
-                    <button class="btn btn-success mb-3" @onclick="TakeProject">
-                        Взять проект
-                    </button>
+                    <div class="applications-list mt-3">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Команда</th>
+                                    <th>Дата</th>
+                                    <th>Сообщение</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var app in applications)
+                                {
+                                    <tr>
+                                        <td>@app.TeamName</td>
+                                        <td>@app.ApplicationDate.ToString("dd.MM.yyyy")</td>
+                                        <td>@app.Message</td>
+                                        <td>@GetApplicationStatusDisplay(app.Status)</td>
+                                        <td>
+                                            @if (app.Status == ProjectApplicationStatus.Pending)
+                                            {
+                                                <button class="btn btn-sm btn-success me-1"
+                                                        @onclick="() => ApproveApplication(app.Id)">
+                                                    Одобрить
+                                                </button>
+                                                <button class="btn btn-sm btn-danger"
+                                                        @onclick="() => RejectApplication(app.Id)">
+                                                    Отклонить
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 }
-                else if (project.Status == ProjectStatus.InProgress && project.TakenByTeamId == currentUserTeamId)
-                {
-                    <button class="btn btn-warning mb-3" @onclick="ReleaseProject">
-                        Отказаться от проекта
-                    </button>
-                }
-            </Authorized>
-        </AuthorizeView>
+            </div>
+        }
+
         @if (project != null && project.Status == ProjectStatus.New)
         {
             <AuthorizeView Policy="">
@@ -124,6 +181,10 @@
     private string? currentUserTeamName;
     private string? currentUserName;
     private bool HasVoted { get; set; }
+
+    private List<ProjectApplication> applications = new();
+    private ProjectApplication? existingApplication;
+    private string newApplicationMessage = string.Empty;
 
     [SupplyParameterFromQuery]
     private int Id { get; set; }
@@ -177,69 +238,128 @@
         {
             HasVoted = project.ApprovedByExperts?.Contains(currentUser.Id) ?? false;
         }
-    }
 
-    private async Task TakeProject()
-    {
-        if (project == null || string.IsNullOrEmpty(currentUserTeamId) || string.IsNullOrEmpty(currentUserTeamName))
-            return;
-
-        using var context = DbFactory.CreateDbContext();
-        var projectToUpdate = await context.Project.FirstOrDefaultAsync(p => p.Id == project.Id);
-
-        if (projectToUpdate != null)
+        if (project != null)
         {
-            projectToUpdate.Status = ProjectStatus.InProgress;
-            projectToUpdate.TakenByTeamId = currentUserTeamId;
-            projectToUpdate.TakenByTeamName = currentUserTeamName;
+            applications = await context.ProjectApplications
+                .Where(a => a.ProjectId == project.Id)
+                .ToListAsync();
 
-            project.Status = projectToUpdate.Status;
-            project.TakenByTeamId = projectToUpdate.TakenByTeamId;
-            project.TakenByTeamName = projectToUpdate.TakenByTeamName;
-
-            var currentUser = await UserManager.GetUserAsync(HttpContextAccessor.HttpContext.User);
-            var teamMember = await context.TeamMembers
-                .Include(tm => tm.Command)
-                .FirstOrDefaultAsync(tm => tm.UserId == currentUser.Id);
-
-            var command = await context.Commands.FirstOrDefaultAsync(c => c.Id == teamMember.Command.Id);
-            command.IsActive = true;
-
-            await context.SaveChangesAsync();
-
-            StateHasChanged();
+            if (currentUserTeamId != null)
+            {
+                existingApplication = applications
+                    .FirstOrDefault(a => a.TeamId == currentUserTeamId);
+            }
         }
     }
 
-    private async Task ReleaseProject()
+    private string GetApplicationStatusDisplay(ProjectApplicationStatus status)
     {
-        if (project == null)
-            return;
+        return status switch
+        {
+            ProjectApplicationStatus.Pending => "На рассмотрении",
+            ProjectApplicationStatus.Approved => "Одобрена",
+            ProjectApplicationStatus.Rejected => "Отклонена",
+            _ => "Неизвестно"
+        };
+    }
+
+    private async Task SubmitApplication()
+    {
+        if (string.IsNullOrWhiteSpace(newApplicationMessage) ||
+            currentUserTeamId == null ||
+            currentUserTeamName == null) return;
 
         using var context = DbFactory.CreateDbContext();
-        var projectToUpdate = await context.Project.FirstOrDefaultAsync(p => p.Id == project.Id);
 
-        if (projectToUpdate != null)
+        var application = new ProjectApplication
+            {
+                ProjectId = project!.Id,
+                TeamId = currentUserTeamId,
+                TeamName = currentUserTeamName,
+                Message = newApplicationMessage,
+                Status = ProjectApplicationStatus.Pending
+            };
+
+        context.ProjectApplications.Add(application);
+        await context.SaveChangesAsync();
+
+        applications.Add(application);
+        existingApplication = application;
+        newApplicationMessage = string.Empty;
+    }
+
+    // Одобрение заявки
+    private async Task ApproveApplication(int applicationId)
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        // Обновляем проект
+        var projectToUpdate = await context.Project.FindAsync(project!.Id);
+        if (projectToUpdate == null) return;
+
+        var application = await context.ProjectApplications.FindAsync(applicationId);
+        if (application == null) return;
+
+        projectToUpdate.Status = ProjectStatus.InProgress;
+        projectToUpdate.TakenByTeamId = application.TeamId;
+        projectToUpdate.TakenByTeamName = application.TeamName;
+
+        // Обновляем заявку
+        application.Status = ProjectApplicationStatus.Approved;
+
+        // Отклоняем остальные заявки
+        var otherApplications = context.ProjectApplications
+            .Where(a => a.ProjectId == project.Id && a.Id != applicationId);
+
+        foreach (var app in otherApplications)
         {
-            projectToUpdate.Status = ProjectStatus.Available;
-            projectToUpdate.TakenByTeamId = null;
-            projectToUpdate.TakenByTeamName = null;
+            app.Status = ProjectApplicationStatus.Rejected;
+        }
 
-            project.Status = projectToUpdate.Status;
-            project.TakenByTeamId = projectToUpdate.TakenByTeamId;
-            project.TakenByTeamName = projectToUpdate.TakenByTeamName;
+        // Активируем команду
+        var command = await context.Commands
+            .FirstOrDefaultAsync(c => c.Id.ToString() == application.TeamId);
 
-            var currentUser = await UserManager.GetUserAsync(HttpContextAccessor.HttpContext.User);
-            var teamMember = await context.TeamMembers
-                .Include(tm => tm.Command)
-                .FirstOrDefaultAsync(tm => tm.UserId == currentUser.Id);
+        if (command != null)
+        {
+            command.IsActive = true;
+        }
 
-            var command = await context.Commands.FirstOrDefaultAsync(c => c.Id == teamMember.Command.Id);
-            command.IsActive = false;
+        await context.SaveChangesAsync();
 
-            await context.SaveChangesAsync();
+        // Обновляем UI
+        project.Status = projectToUpdate.Status;
+        project.TakenByTeamId = projectToUpdate.TakenByTeamId;
+        project.TakenByTeamName = projectToUpdate.TakenByTeamName;
 
-            StateHasChanged();
+        applications = await context.ProjectApplications
+            .Where(a => a.ProjectId == project.Id)
+            .ToListAsync();
+
+        existingApplication = applications
+            .FirstOrDefault(a => a.TeamId == currentUserTeamId);
+    }
+
+    // Отклонение заявки
+    private async Task RejectApplication(int applicationId)
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var application = await context.ProjectApplications.FindAsync(applicationId);
+        if (application == null) return;
+
+        application.Status = ProjectApplicationStatus.Rejected;
+        await context.SaveChangesAsync();
+
+        // Обновляем UI
+        applications = applications
+            .Select(a => a.Id == applicationId ? application : a)
+            .ToList();
+
+        if (currentUserTeamId == application.TeamId)
+        {
+            existingApplication = application;
         }
     }
 
