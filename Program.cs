@@ -14,6 +14,51 @@ using VSHCTwebApp.Components.Models;
 
 namespace VSHCTwebApp
 {
+
+    public class ProjectAvailabilityService : BackgroundService
+    {
+        private readonly IServiceProvider _services;
+        private readonly ILogger<ProjectAvailabilityService> _logger;
+
+        public ProjectAvailabilityService(IServiceProvider services, ILogger<ProjectAvailabilityService> logger)
+        {
+            _services = services;
+            _logger = logger;
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                using (var scope = _services.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<VSHCTwebAppContext>();
+
+                    var now = DateTime.Now;
+                    var expiredProjects = await dbContext.Project
+                        .Where(p => p.IsManuallyMadeAvailable &&
+                                   p.AvailableUntil.HasValue &&
+                                   p.AvailableUntil <= now)
+                        .ToListAsync();
+
+                    foreach (var project in expiredProjects)
+                    {
+                        project.Status = ProjectStatus.Approved;
+                        project.IsManuallyMadeAvailable = false;
+                        _logger.LogInformation($"Project {project.Id} returned to confirmed (expired)");
+                    }
+
+                    if (expiredProjects.Any())
+                    {
+                        await dbContext.SaveChangesAsync();
+                    }
+                }
+
+                await Task.Delay(TimeSpan.FromHours(1), stoppingToken); // Проверяем каждый час
+            }
+        }
+    }
+
     public class Program
     {
         public static void Main(string[] args)
@@ -34,6 +79,7 @@ namespace VSHCTwebApp
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
             builder.Services.AddScoped<LikeService> ();
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -126,6 +172,7 @@ namespace VSHCTwebApp
 
             builder.Services.AddScoped<ProfileService>();
 
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -153,6 +200,8 @@ namespace VSHCTwebApp
             app.MapAdditionalIdentityEndpoints();
 
             app.Run();
+
+
         }
     }
 }

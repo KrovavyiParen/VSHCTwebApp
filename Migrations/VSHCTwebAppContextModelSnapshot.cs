@@ -163,6 +163,9 @@ namespace VSHCTwebApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("AvailableUntil")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -174,6 +177,9 @@ namespace VSHCTwebApp.Migrations
                     b.Property<string>("DescrNeededResurses")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsManuallyMadeAvailable")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Problem")
                         .IsRequired()
