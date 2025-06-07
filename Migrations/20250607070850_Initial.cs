@@ -99,12 +99,32 @@ namespace VSHCTwebApp.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     TakenByTeamId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TakenByTeamName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AvailableUntil = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsManuallyMadeAvailable = table.Column<bool>(type: "bit", nullable: false),
                     ApprovalCount = table.Column<int>(type: "int", nullable: false),
                     ApprovedByExperts = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Project", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectApplications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProjectId = table.Column<int>(type: "int", nullable: false),
+                    TeamId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    TeamName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    ApplicationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectApplications", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -236,6 +256,9 @@ namespace VSHCTwebApp.Migrations
 
             migrationBuilder.DropTable(
                 name: "Project");
+
+            migrationBuilder.DropTable(
+                name: "ProjectApplications");
 
             migrationBuilder.DropTable(
                 name: "Responses");

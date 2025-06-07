@@ -12,8 +12,8 @@ using VSHCTwebApp.Data;
 namespace VSHCTwebApp.Migrations
 {
     [DbContext(typeof(VSHCTwebAppContext))]
-    [Migration("20250607064857_Initial3")]
-    partial class Initial3
+    [Migration("20250607070850_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -166,6 +166,9 @@ namespace VSHCTwebApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("AvailableUntil")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -177,6 +180,9 @@ namespace VSHCTwebApp.Migrations
                     b.Property<string>("DescrNeededResurses")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsManuallyMadeAvailable")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Problem")
                         .IsRequired()
