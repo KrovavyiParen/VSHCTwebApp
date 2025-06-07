@@ -14,7 +14,6 @@ html, body {
 
 body {
     display: flex;
-    justify-content: center;
     align-content: center;
     flex-direction: column;
     
@@ -518,4 +517,8 @@ body-login {
     justify-content: center;
     align-content: center;
     flex-wrap:wrap;
+}
+
+.col-md-4 {
+    padding: 1rem;
 }

@@ -12,10 +12,9 @@
 
 
 <h1>Подробнее</h1>
-
+<hr/>
 <div class="details-container">
 
-    <hr />
     @if (project is null)
     {
         <p><em>Loading...</em></p>
@@ -80,7 +79,7 @@
             @if (currentUserName == project.CreatedByEmail)
             {
                 <a href="@($"/projects/edit?id={project.Id}")" class="btn btn-primary mb-3">Изменить</a>
-            } |
+            }
             <a href="@($"/projects")" class="btn btn-primary mb-3">Вернуться</a>
         </div>
         @if (project != null && project.Status == ProjectStatus.Available)
@@ -96,7 +95,7 @@
                             <div class="application-form mb-4">
                                 <h4>Подать заявку</h4>
                                 <textarea class="form-control mb-2" placeholder="Ваше сообщение..."
-                                          @bind="newApplicationMessage"></textarea>
+                                @bind="newApplicationMessage"></textarea>
                                 <button class="btn btn-primary" @onclick="SubmitApplication">Отправить заявку</button>
                             </div>
                         }
@@ -138,11 +137,11 @@
                                             @if (app.Status == ProjectApplicationStatus.Pending)
                                             {
                                                 <button class="btn btn-sm btn-success me-1"
-                                                        @onclick="() => ApproveApplication(app.Id)">
+                                                @onclick="() => ApproveApplication(app.Id)">
                                                     Одобрить
                                                 </button>
                                                 <button class="btn btn-sm btn-danger"
-                                                        @onclick="() => RejectApplication(app.Id)">
+                                                @onclick="() => RejectApplication(app.Id)">
                                                     Отклонить
                                                 </button>
                                             }
@@ -172,37 +171,39 @@
             </AuthorizeView>
         }
     }
-</div>
-
-@if (project != null && project.Status == ProjectStatus.Approved)
-{
-    <AuthorizeView Policy="">
-        <Authorized>
-            <div class="mt-4">
-                @if (!project.IsManuallyMadeAvailable)
-                {
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label for="availableUntil" class="form-label">Срок доступности:</label>
-                            <InputDate id="availableUntil" @bind-Value="availableUntilDate" class="form-control" />
+    @if (project != null && project.Status == ProjectStatus.Approved)
+    {
+        <AuthorizeView Policy="">
+            <Authorized>
+                <div class="mt-4">
+                    @if (!project.IsManuallyMadeAvailable)
+                    {
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="availableUntil" class="form-label">Срок доступности:</label>
+                                <InputDate id="availableUntil" @bind-Value="availableUntilDate" class="form-control" />
+                            </div>
+                            
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
                             <button class="btn btn-success" @onclick="MakeProjectAvailable">
                                 Открыть доступ
                             </button>
                         </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="alert alert-info">
-                        Проект доступен до: @project.AvailableUntil?.ToString("dd.MM.yyyy")
-                    </div>
-                }
-            </div>
-        </Authorized>
-    </AuthorizeView>
-}
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            Проект доступен до: @project.AvailableUntil?.ToString("dd.MM.yyyy")
+                        </div>
+                    }
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    }
+</div>
+
+
 
 @code {
     @rendermode InteractiveServer

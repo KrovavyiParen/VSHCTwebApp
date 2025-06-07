@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace VSHCTwebApp.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class mssqllocal_migration_169 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
